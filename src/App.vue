@@ -1,10 +1,12 @@
 <template>
   <div id="app">
-    <DragBoxPlural v-model="options" style="width:200px;height:200px;border:1px solid #000;">
+    拖拽例子，不使用draggable 可在拖拽时滚动，代价是鼠标移出容器时表现问题
+    <DragBoxPlural v-model="options" style="width:100%;height:200px;border:1px solid #000;text-align:center;">
       <template v-slot:default="{item}">
         <div style="width:100%;">{{item}}</div>
       </template>
     </DragBoxPlural>
+    表格例子，支持多级表头，固定行固定列，虚拟滚动，等
     <CrabTable
       style="width:100%;height:600px;overflow: hidden;"
       :virtualCol="9"
@@ -27,7 +29,7 @@ export default {
   components: { DragBoxPlural, CrabTable },
   data () {
     return {
-      options: [['a', 'b', 'c'], [], []],
+      options: [['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n'], [], []],
       active: false,
       columnList: [
         {
@@ -514,20 +516,4 @@ export default {
 </script>
 
 <style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
-.test{
-  width:100px;height:200px;
-  background: transparent;
-}
-.test.active{
-  width: 200px;
-  background:#ccc;
-}
 </style>
