@@ -2,7 +2,7 @@
   <div
     class="scroll-box"
     ref="scroll-box"
-    :style="{overflow:overflow}"
+    :style="boxStyle"
   >
     <div @mouseover="hover(true)" @mouseleave="hover(false)" class="scroll-view" ref="scroll-view" @scroll="scroll" :style="{height:`calc(100% + ${hideYWidth}px)`,width:`calc(100% + ${hideXWidth}px)`}">
       <slot></slot>
@@ -23,7 +23,6 @@
 </template>
 
 <script>
-
 const scrollNameMap = {
   Y: 'scrollTop',
   X: 'scrollLeft'
@@ -38,7 +37,8 @@ export default {
       default: 'rgba(0,0,0,0.3)'
     },
     scrollTop: Number,
-    scrollLeft: Number
+    scrollLeft: Number,
+    type: String
   },
   data () {
     return {
@@ -66,6 +66,15 @@ export default {
         Y: 0
       },
       clickBarName: ''
+    }
+  },
+  computed: {
+    boxStyle () {
+      const boxStyle = { overflow: this.overflow }
+      if (this.type === 'flex') {
+        boxStyle.margin = `0 0 -${this.hideYWidth}px 0`
+      }
+      return boxStyle
     }
   },
   watch: {
