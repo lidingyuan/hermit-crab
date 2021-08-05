@@ -32,7 +32,7 @@
           </template>
         </TableBody>
       </div>
-      <ScrollBox class="default-sticky-body" type="flex" :scrollLeft="scrollLeft" @scrollChange="(scrollTop,scrollLeft)=>{scrollChange(undefined,scrollLeft)}">
+      <ScrollBox class="crab-table-default" type="flex" :scrollLeft="scrollLeft" @scrollChange="(scrollTop,scrollLeft)=>{scrollChange(undefined,scrollLeft)}">
         <TableBody
           :dataList="stickyDataList"
           :dataProp="dataProp"
@@ -83,7 +83,7 @@
           </template>
         </TableBody>
       </ScrollBox>
-      <ScrollBox class="default-body" type="flex" :scrollTop="scrollTop" :scrollLeft="scrollLeft" @scrollChange="scrollChange">
+      <ScrollBox class="crab-table-default" type="flex" :scrollTop="scrollTop" :scrollLeft="scrollLeft" @scrollChange="scrollChange">
         <TableBody
           :dataList="defaultDataList"
           :dataProp="dataProp"
@@ -237,7 +237,7 @@ export default {
         }
         return false
       })
-      return colIndex - this.virtualBeginCol
+      return colIndex - this.virtualBeginCol + 1
     },
     virtualBoxStyle () {
       return {
@@ -295,10 +295,10 @@ export default {
           })
         } else {
           if (fixed) {
-            this.fixedDataProp[column.field] = { field: column.field, width: width, transformX: this.fixedWidth, colIndex: parentIndex + index }
+            this.fixedDataProp[column.field] = { field: column.field, width: width, transformX: this.fixedWidth, colIndex: parentIndex + index, style: column.style }
             this.fixedWidth += width
           } else {
-            this.dataProp[column.field] = { field: column.field, width: width, transformX: this.defaultWidth, colIndex: parentIndex + index }
+            this.dataProp[column.field] = { field: column.field, width: width, transformX: this.defaultWidth, colIndex: parentIndex + index, style: column.style }
             this.defaultWidth += width
           }
         }
@@ -346,6 +346,10 @@ export default {
   }
   .crab-table-fixed{
     flex-shrink: 0;
+  }
+  .crab-table-default{
+    width: 0;
+    flex-grow: 1;
   }
 }
 </style>

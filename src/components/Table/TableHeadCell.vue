@@ -1,6 +1,6 @@
 <template>
   <div class="table-head-cell">
-    <TableCell>{{head.name}}</TableCell>
+    <TableCell style="flex-grow:1;">{{head.name}}</TableCell>
     <div class="table-head-row" v-if="head.children.length">
       <TableHeadCell
         v-for="head in head.children"

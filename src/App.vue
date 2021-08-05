@@ -6,7 +6,7 @@
         <div style="width:100%;">{{item}}</div>
       </template>
     </DragBoxPlural>
-    表格例子，支持多级表头，固定行固定列，虚拟滚动，等
+    表格例子，支持多级表头，固定行固定列，虚拟滚动，复制粘贴(excel)，等
     <CrabTable
       style="width:100%;height:600px;overflow: hidden;"
       :virtualCol="9"
@@ -37,7 +37,7 @@ export default {
           name: '测试1',
           children: [
             { field: 'test1', name: '测试2' },
-            { field: 'test2', name: '测试3' }
+            { field: 'test2', name: '测试3', style: { 'text-align': 'center' } }
           ]
         },
         {

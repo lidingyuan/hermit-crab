@@ -27,10 +27,10 @@
         :key="propKey"
         :style="
           virtualBeginCol === undefined || virtualBeginCol === -1
-          ?{width:col.width+'px'}
+          ?{width:col.width+'px',...col.style}
           :renderType ===1
-            ?{width:col.width+'px',transform:`translate(${Object.values(renderDataProp)[0].transformX}px,0)`}
-            :{width:col.width+'px',transform:`translate(${col.transformX}px,0)`,position:'absolute',top:0,height:baseRowHeight+'px'}
+            ?{width:col.width+'px',transform:`translate(${Object.values(renderDataProp)[0].transformX}px,0)`,...col.style}
+            :{width:col.width+'px',transform:`translate(${col.transformX}px,0)`,position:'absolute',top:0,height:baseRowHeight+'px',...col.style}
         "
         :rowIndex="row.rowIndex"
         :colIndex="col.colIndex"
