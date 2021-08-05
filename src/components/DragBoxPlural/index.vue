@@ -130,8 +130,11 @@ export default {
       })
     },
     mousedown (event, option, index, colIndex) {
+      if (this.pickUp) {
+        return
+      }
       this.fixBaseSize()
-      setTimeout(() => {
+      this.timeout = setTimeout(() => {
         this.pickUp = this.dragKey ? option[this.dragKey] : option
         this.pickIndex = index
         this.pickColIndex = colIndex
@@ -212,6 +215,7 @@ export default {
 .drag-box-base{
   display: flex;
   height: 100%;
+  user-select: none;
   .divider{
     width: 1px;
     margin: 5px 0;

@@ -77,8 +77,11 @@ export default {
       })
     },
     mousedown (event, option, index) {
+      if (this.pickUp) {
+        return
+      }
       this.fixBaseSize()
-      setTimeout(() => {
+      this.timeout = setTimeout(() => {
         this.pickUp = this.dragKey ? option[this.dragKey] : option
         this.pickIndex = index
         this.height = this.pickUpDom.clientHeight
@@ -136,6 +139,7 @@ export default {
 .drag-block-base{
   cursor: move;
   position: relative;
+  user-select: none;
 }
   .drag-block{
     display: flex;
