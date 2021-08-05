@@ -1,5 +1,7 @@
 # hermit-crab-core
 
+https://lidingyuan.github.io/hermit-crab/
+
 ## Project setup
 ```
 npm install
