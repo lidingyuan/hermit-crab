@@ -1,126 +1,10 @@
-<template>
-  <div class="crab-table">
-    <!-- 表头 -->
-    <div class="head">
-      <div class="crab-table-fixed">
-        <TableHead :headData="fixedHeadData"></TableHead>
-      </div>
-      <ScrollBox class="default-head" type="flex" :scrollLeft="scrollLeft" @scrollChange="(scrollTop,scrollLeft)=>{scrollChange(undefined,scrollLeft)}">
-        <TableHead :headData="defaultHeadData"></TableHead>
-      </ScrollBox>
-    </div>
-    <!-- 固定行表格 -->
-    <div class="sticky-body" ref="sticky">
-      <div class="crab-table-fixed" :style="{width:fixedWidth+'px'}">
-        <TableBody
-          :dataList="stickyDataList"
-          :dataProp="fixedDataProp"
-          :renderType="renderType"
-          :baseRowHeight="baseRowHeight"
-        >
-          <template v-for="(propValue,propKey) in dataProp" #[propKey]="scope">
-            <slot
-              :rowIndex="scope.rowIndex"
-              :colIndex="scope.colIndex"
-              :row="scope.row"
-              :propKey="scope.propKey"
-              :dataProp="dataProp"
-              :dataList="dataList"
-              :name="scope.propKey"
-            >
-            </slot>
-          </template>
-        </TableBody>
-      </div>
-      <ScrollBox class="crab-table-default" type="flex" :scrollLeft="scrollLeft" @scrollChange="(scrollTop,scrollLeft)=>{scrollChange(undefined,scrollLeft)}">
-        <TableBody
-          :dataList="stickyDataList"
-          :dataProp="dataProp"
-          :virtualBoxStyle="{width:virtualBoxStyle.width}"
-          :renderType="renderType"
-          :baseRowHeight="baseRowHeight"
-        >
-          <template v-for="(propValue,propKey) in dataProp" #[propKey]="scope">
-            <slot
-              :rowIndex="scope.rowIndex"
-              :colIndex="scope.colIndex"
-              :row="scope.row"
-              :propKey="scope.propKey"
-              :dataProp="dataProp"
-              :dataList="dataList"
-              :name="scope.propKey"
-            >
-            </slot>
-          </template>
-        </TableBody>
-      </ScrollBox>
-    </div>
-    <!-- 表格 -->
-    <div class="body" ref="main">
-      <ScrollBox class="crab-table-fixed" type="flex" :scrollTop="scrollTop" @scrollChange="(scrollTop)=>{scrollChange(scrollTop)}" :style="{width:fixedWidth+'px'}">
-        <TableBody
-          :dataList="defaultDataList"
-          :dataProp="fixedDataProp"
-          :virtualBeginRow="virtualBeginRow"
-          :virtualBoxStyle="{height:virtualBoxStyle.height}"
-          :transformY="virtualBeginRow !== -1 ? scrollTop : 0"
-          :virtualRowSize="virtualRowSize"
-          :virtualColSize="virtualColSize"
-          :renderType="renderType"
-          :baseRowHeight="baseRowHeight"
-        >
-          <template v-for="(propValue,propKey) in dataProp" #[propKey]="scope">
-            <slot
-              :rowIndex="scope.rowIndex+stickyRows"
-              :colIndex="scope.colIndex"
-              :row="scope.row"
-              :propKey="scope.propKey"
-              :dataProp="dataProp"
-              :dataList="dataList"
-              :name="scope.propKey"
-            >
-            </slot>
-          </template>
-        </TableBody>
-      </ScrollBox>
-      <ScrollBox class="crab-table-default" type="flex" :scrollTop="scrollTop" :scrollLeft="scrollLeft" @scrollChange="scrollChange">
-        <TableBody
-          :dataList="defaultDataList"
-          :dataProp="dataProp"
-          :virtualBeginCol="virtualBeginCol"
-          :virtualBeginRow="virtualBeginRow"
-          :virtualBoxStyle="virtualBoxStyle"
-          :transformX="virtualBeginCol !== -1 ? scrollLeft : 0"
-          :transformY="virtualBeginRow !== -1 ? scrollTop : 0"
-          :virtualRowSize="virtualRowSize"
-          :virtualColSize="virtualColSize"
-          :renderType="renderType"
-          :baseRowHeight="baseRowHeight"
-        >
-          <template v-for="(propValue,propKey) in dataProp" #[propKey]="scope">
-            <slot
-              :rowIndex="scope.rowIndex+stickyRows"
-              :colIndex="scope.colIndex"
-              :row="scope.row"
-              :propKey="scope.propKey"
-              :dataProp="dataProp"
-              :dataList="dataList"
-              :name="scope.propKey"
-            >
-            </slot>
-          </template>
-        </TableBody>
-      </ScrollBox>
-    </div>
-  </div>
-</template>
 
 <script>
 import TableHead from './TableHead'
 import TableBody from './TableBody'
 import ScrollBox from '../ScrollBox'
 export default {
-  name: 'ZlTable',
+  name: 'Table',
   components: { TableHead, TableBody, ScrollBox },
   props: {
     // data
@@ -207,7 +91,7 @@ export default {
       return rowIndex
     },
     virtualRowSize () {
-      return parseInt(this.viewHeight / this.baseRowHeight) + 1
+      return parseInt(this.viewHeight / this.baseRowHeight)
     },
     virtualBeginCol () {
       const propList = Object.values(this.dataProp)
@@ -263,9 +147,9 @@ export default {
     }
   },
   mounted () {
-    this.viewHeight = this.$refs.main.clientHeight + this.$refs.sticky.clientHeight
-    this.viewWidth = this.$refs.main.clientWidth
+    this.getViewSize()
     this.baseRowHeight = parseInt(window.getComputedStyle(this.$refs.main).lineHeight)
+    window.addEventListener('resize', this.getViewSize, false)
   },
   methods: {
     scrollChange (scrollTop, scrollLeft) {
@@ -319,7 +203,139 @@ export default {
         columnData.push(data)
       })
       return columnData
+    },
+    getViewSize () {
+      this.viewHeight = this.$refs.table.clientHeight
+      this.viewWidth = this.$refs.table.clientWidth
+    },
+    renderHead () {
+      return (
+        <div class="head">
+          <div class="crab-table-fixed">
+            <TableHead headData={this.fixedHeadData}></TableHead>
+          </div>
+          {this.renderScrollBox(false, true, 'default-head', '', <TableHead headData={this.defaultHeadData}></TableHead>)}
+        </div>
+      )
+    },
+    renderStickyBody () {
+      return (
+        <div class="sticky-body">
+          <div class="crab-table-fixed" style={{ width: this.fixedWidth + 'px' }}>
+            {this.renderBody({
+              dataList: this.stickyDataList,
+              dataProp: this.fixedDataProp,
+              virtualBoxStyle: {}
+            })}
+          </div>
+          {this.renderScrollBox(false, true, 'crab-table-default', '', this.renderBody({
+            dataList: this.stickyDataList,
+            dataProp: this.dataProp,
+            virtualBoxStyle: { width: this.virtualBoxStyle.width }
+          }))}
+        </div>
+      )
+    },
+    renderDefaultBody () {
+      return (
+        <div class="body" ref="main">
+          {this.renderScrollBox(true, false, 'crab-table-fixed', { width: this.fixedWidth + 'px' }, this.renderBody({
+            dataList: this.defaultDataList,
+            dataProp: this.fixedDataProp,
+            virtualBeginRow: this.virtualBeginRow,
+            virtualBoxStyle: { height: this.virtualBoxStyle.height },
+            transformY: this.virtualBeginRow !== -1 ? this.scrollTop : 0,
+            virtualRowSize: this.virtualRowSize,
+            virtualColSize: this.virtualColSize
+          }))}
+          {this.renderScrollBox(true, true, 'crab-table-default', '', this.renderBody({
+            dataList: this.defaultDataList,
+            dataProp: this.dataProp,
+            virtualBeginCol: this.virtualBeginCol,
+            virtualBeginRow: this.virtualBeginRow,
+            virtualBoxStyle: this.virtualBoxStyle,
+            transformX: this.virtualBeginCol !== -1 ? this.scrollLeft : 0,
+            transformY: this.virtualBeginRow !== -1 ? this.scrollTop : 0,
+            virtualRowSize: this.virtualRowSize,
+            virtualColSize: this.virtualColSize
+          }))}
+        </div>
+      )
+    },
+    renderScrollBox (top, left, clazz, style, slot) {
+      return (
+        <ScrollBox
+          class={clazz}
+          type="flex"
+          style={style}
+          scrollLeft={left ? this.scrollLeft : 0}
+          scrollTop={top ? this.scrollTop : 0}
+          {
+            ...{
+              on:
+              { scrollChange: (scrollTop, scrollLeft) => { this.scrollChange(top ? scrollTop : undefined, left ? scrollLeft : undefined) } }
+            }
+          }
+        >
+          {slot}
+        </ScrollBox>
+      )
+    },
+    renderBody (prop) {
+      return (
+        <TableBody
+          dataList={prop.dataList}
+          dataProp={prop.dataProp}
+          renderType={this.renderType}
+          virtualBeginCol={prop.virtualBeginCol}
+          virtualBeginRow={prop.virtualBeginRow}
+          virtualBoxStyle={prop.virtualBoxStyle}
+          transformX={prop.transformX}
+          transformY={prop.transformY}
+          virtualRowSize={prop.virtualRowSize}
+          virtualColSize={prop.virtualColSize}
+          baseRowHeight={this.baseRowHeight}
+        >
+          {
+            Object.keys(this.dataProp).map(key => {
+              return (
+                <template scopedSlots={
+                  {
+                    [key]: props => {
+                      return (
+                        <slot
+                          rowIndex={props.rowIndex}
+                          colIndex={props.colIndex}
+                          row={props.row}
+                          propKey={props.propKey}
+                          dataProp={this.dataProp}
+                          dataList={this.dataList}
+                          name={props.propKey}
+                        >
+                        </slot>
+                      )
+                    }
+                  }
+                }>
+                </template>
+              )
+            })
+          }
+        </TableBody>
+      )
     }
+  },
+  beforeDestroy () {
+    window.removeEventListener('resize', this.getViewSize)
+  },
+  render () {
+    return (
+      <div ref="table" class="crab-table">
+        {this.renderHead()}
+        {this.renderStickyBody()}
+        {this.renderDefaultBody()}
+      </div>
+    )
   }
 }
 </script>

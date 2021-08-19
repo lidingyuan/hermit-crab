@@ -7,6 +7,9 @@
       </template>
     </DragBoxPlural>
     表格例子，支持多级表头，固定行固定列，虚拟滚动，复制粘贴(excel)，等
+    预计添加：
+      1.动态配置表格结构，固定行，滚动行交错，多个滚动容器等
+
     <CrabTable
       style="width:100%;height:600px;overflow: hidden;"
       :virtualCol="9"
@@ -18,15 +21,18 @@
         {{rowIndex}}
       </template>
     </CrabTable>
+    考虑改用svg实现效果
+    <CrabLoading></CrabLoading>
   </div>
 </template>
 
 <script>
 import DragBoxPlural from './components/DragBoxPlural'
 import CrabTable from './components/Table'
+import CrabLoading from './components/Loading'
 export default {
   name: 'App',
-  components: { DragBoxPlural, CrabTable },
+  components: { DragBoxPlural, CrabTable, CrabLoading },
   data () {
     return {
       options: [['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n'], [], []],
