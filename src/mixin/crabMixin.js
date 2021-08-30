@@ -7,7 +7,7 @@ Vue.mixin({
     if (throttles) {
       Object.keys(throttles).forEach(key => {
         if (this[key] !== undefined) {
-          console.error(`throttles绑定错误：组件${this.$options.name}已有${key}`)
+          // console.error(`throttles绑定错误：组件${this.$options.name}已有${key}`)
           return
         }
         const obj = {
@@ -23,7 +23,7 @@ Vue.mixin({
     if (debounces) {
       Object.keys(debounces).forEach(key => {
         if (this[key] !== undefined) {
-          console.error(`debounces绑定错误：组件${this.$options.name}已有${key}`)
+          // console.error(`debounces绑定错误：组件${this.$options.name}已有${key}`)
           return
         }
         const obj = {
