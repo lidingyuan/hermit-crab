@@ -1,5 +1,8 @@
 <template>
-  <div class="table-pick-cell" :style="pickStyle"></div>
+  <div
+    class="table-pick-cell"
+    :style="pickStyle"
+  />
 </template>
 
 <script>

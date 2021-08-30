@@ -3,8 +3,9 @@
 import TableHead from './TableHead'
 import TableBody from './TableBody'
 import ScrollBox from '../ScrollBox'
+import * as renderFun from './render'
 export default {
-  name: 'Table',
+  name: 'CrabTable',
   components: { TableHead, TableBody, ScrollBox },
   props: {
     // data
@@ -33,6 +34,14 @@ export default {
     renderType: {
       type: Number,
       default: 1
+    },
+    excelMode: {
+      type: Boolean,
+      default: true
+    },
+    orders: {
+      type: Array,
+      default: () => ['asc', 'desc', null]
     }
   },
   data () {
@@ -56,7 +65,26 @@ export default {
 
       baseRowHeight: 0,
       viewHeight: 0,
-      viewWidth: 0
+      viewWidth: 0,
+
+      focusBody: 0,
+      renderRowHeight: {
+        sticky: [],
+        default: []
+      },
+
+      sortTag: {
+        key: '',
+        type: -1
+      },
+      sortMap: {
+        asc: (num) => {
+          return num
+        },
+        desc: (num) => {
+          return num * -1
+        }
+      }
     }
   },
   computed: {
@@ -71,7 +99,22 @@ export default {
       })
     },
     defaultDataList () {
-      return this.dataList.slice(this.stickyRows).map((item, index) => {
+      const dataList = this.dataList.slice(this.stickyRows)
+      if (!this.sortTag.key || this.orders[this.sortTag.type] === null) {
+        // return dataList
+      } else {
+        const type = this.orders[this.sortTag.type]
+        dataList.sort((a, b) => {
+          if (a[this.sortTag.key] > b[this.sortTag.key]) {
+            return this.sortMap[type](1)
+          }
+          if (a[this.sortTag.key] < b[this.sortTag.key]) {
+            return this.sortMap[type](-1)
+          }
+          return 0
+        })
+      }
+      return dataList.map((item, index) => {
         const row = {
           rowIndex: index,
           maxHeight: 0,
@@ -88,6 +131,9 @@ export default {
         return -1
       }
       const rowIndex = parseInt(this.scrollTop / this.baseRowHeight) || 0
+      if (this.virtualRowSize + rowIndex >= this.defaultDataList.length) {
+        return this.defaultDataList.length - this.virtualRowSize
+      }
       return rowIndex
     },
     virtualRowSize () {
@@ -106,6 +152,9 @@ export default {
         }
         return false
       })
+      if (this.virtualColSize + colIndex >= propList.length) {
+        return propList.length - this.virtualColSize
+      }
       return colIndex
     },
     virtualColSize () {
@@ -114,14 +163,19 @@ export default {
         return -1
       }
       let colIndex = propList.length
+      let beginIndex = -1
       propList.find((prop, index) => {
+        if ((prop.transformX + prop.width > this.scrollLeft) && beginIndex === -1) {
+          beginIndex = index - 1
+          return false
+        }
         if (prop.transformX + prop.width > this.scrollLeft + this.viewWidth) {
           colIndex = index
           return true
         }
         return false
       })
-      return colIndex - this.virtualBeginCol + 1
+      return (colIndex - beginIndex) + 1
     },
     virtualBoxStyle () {
       return {
@@ -151,25 +205,21 @@ export default {
     this.baseRowHeight = parseInt(window.getComputedStyle(this.$refs.main).lineHeight)
     window.addEventListener('resize', this.getViewSize, false)
   },
+  beforeDestroy () {
+    window.removeEventListener('resize', this.getViewSize)
+  },
   methods: {
-    scrollChange (scrollTop, scrollLeft) {
-      if (scrollTop !== undefined) {
-        this.scrollTop = scrollTop
-      }
-      if (scrollLeft !== undefined) {
-        this.scrollLeft = scrollLeft
-      }
-    },
-    buildHead (columnList, level = 1, parentIndex = 0) {
+    buildHead (columnList, level = 1) {
       const columnData = []
       let transformX = 0
-      columnList.forEach((column, index) => {
+      columnList.forEach(column => {
         let children = []
         let width = column.width || 200
         let fixed = column.fixed || false
         let maxLevel = level
+        let index = 0
         if (column.children && column.children.length) {
-          children = this.buildHead(column.children, level + 1, index)
+          children = this.buildHead(column.children, level + 1)
           width = 0
           fixed = false
           children.forEach(item => {
@@ -179,15 +229,18 @@ export default {
           })
         } else {
           if (fixed) {
-            this.fixedDataProp[column.field] = { field: column.field, width: width, transformX: this.fixedWidth, colIndex: parentIndex + index, style: column.style }
+            index = Object.keys(this.fixedDataProp).length
+            this.fixedDataProp[column.field] = { field: column.field, width: width, transformX: this.fixedWidth, colIndex: index, style: column.style }
             this.fixedWidth += width
           } else {
-            this.dataProp[column.field] = { field: column.field, width: width, transformX: this.defaultWidth, colIndex: parentIndex + index, style: column.style }
+            index = Object.keys(this.dataProp).length
+            this.dataProp[column.field] = { field: column.field, width: width, transformX: this.defaultWidth, colIndex: index, style: column.style }
             this.defaultWidth += width
           }
         }
         const data = {
           name: column.name,
+          field: column.field,
           index: index,
           fixed,
           width,
@@ -208,132 +261,30 @@ export default {
       this.viewHeight = this.$refs.table.clientHeight
       this.viewWidth = this.$refs.table.clientWidth
     },
-    renderHead () {
-      return (
-        <div class="head">
-          <div class="crab-table-fixed">
-            <TableHead headData={this.fixedHeadData}></TableHead>
-          </div>
-          {this.renderScrollBox(false, true, 'default-head', '', <TableHead headData={this.defaultHeadData}></TableHead>)}
-        </div>
-      )
+    // 排序
+    sortData (head) {
+      if (this.sortTag.key === head.field) {
+        this.sortTag.type = (this.sortTag.type + 1) % this.orders.length
+      } else {
+        this.sortTag.key = head.field
+        this.sortTag.type = 0
+      }
     },
-    renderStickyBody () {
-      return (
-        <div class="sticky-body">
-          <div class="crab-table-fixed" style={{ width: this.fixedWidth + 'px' }}>
-            {this.renderBody({
-              dataList: this.stickyDataList,
-              dataProp: this.fixedDataProp,
-              virtualBoxStyle: {}
-            })}
-          </div>
-          {this.renderScrollBox(false, true, 'crab-table-default', '', this.renderBody({
-            dataList: this.stickyDataList,
-            dataProp: this.dataProp,
-            virtualBoxStyle: { width: this.virtualBoxStyle.width }
-          }))}
-        </div>
-      )
-    },
-    renderDefaultBody () {
-      return (
-        <div class="body" ref="main">
-          {this.renderScrollBox(true, false, 'crab-table-fixed', { width: this.fixedWidth + 'px' }, this.renderBody({
-            dataList: this.defaultDataList,
-            dataProp: this.fixedDataProp,
-            virtualBeginRow: this.virtualBeginRow,
-            virtualBoxStyle: { height: this.virtualBoxStyle.height },
-            transformY: this.virtualBeginRow !== -1 ? this.scrollTop : 0,
-            virtualRowSize: this.virtualRowSize,
-            virtualColSize: this.virtualColSize
-          }))}
-          {this.renderScrollBox(true, true, 'crab-table-default', '', this.renderBody({
-            dataList: this.defaultDataList,
-            dataProp: this.dataProp,
-            virtualBeginCol: this.virtualBeginCol,
-            virtualBeginRow: this.virtualBeginRow,
-            virtualBoxStyle: this.virtualBoxStyle,
-            transformX: this.virtualBeginCol !== -1 ? this.scrollLeft : 0,
-            transformY: this.virtualBeginRow !== -1 ? this.scrollTop : 0,
-            virtualRowSize: this.virtualRowSize,
-            virtualColSize: this.virtualColSize
-          }))}
-        </div>
-      )
-    },
-    renderScrollBox (top, left, clazz, style, slot) {
-      return (
-        <ScrollBox
-          class={clazz}
-          type="flex"
-          style={style}
-          scrollLeft={left ? this.scrollLeft : 0}
-          scrollTop={top ? this.scrollTop : 0}
-          {
-            ...{
-              on:
-              { scrollChange: (scrollTop, scrollLeft) => { this.scrollChange(top ? scrollTop : undefined, left ? scrollLeft : undefined) } }
-            }
-          }
-        >
-          {slot}
-        </ScrollBox>
-      )
-    },
-    renderBody (prop) {
-      return (
-        <TableBody
-          dataList={prop.dataList}
-          dataProp={prop.dataProp}
-          renderType={this.renderType}
-          virtualBeginCol={prop.virtualBeginCol}
-          virtualBeginRow={prop.virtualBeginRow}
-          virtualBoxStyle={prop.virtualBoxStyle}
-          transformX={prop.transformX}
-          transformY={prop.transformY}
-          virtualRowSize={prop.virtualRowSize}
-          virtualColSize={prop.virtualColSize}
-          baseRowHeight={this.baseRowHeight}
-        >
-          {
-            Object.keys(this.dataProp).map(key => {
-              return (
-                <template scopedSlots={
-                  {
-                    [key]: props => {
-                      return (
-                        <slot
-                          rowIndex={props.rowIndex}
-                          colIndex={props.colIndex}
-                          row={props.row}
-                          propKey={props.propKey}
-                          dataProp={this.dataProp}
-                          dataList={this.dataList}
-                          name={props.propKey}
-                        >
-                        </slot>
-                      )
-                    }
-                  }
-                }>
-                </template>
-              )
-            })
-          }
-        </TableBody>
-      )
+    scrollChange (scrollTop, scrollLeft) {
+      if (scrollTop !== undefined) {
+        this.scrollTop = scrollTop
+      }
+      if (scrollLeft !== undefined) {
+        this.scrollLeft = scrollLeft
+      }
     }
   },
-  beforeDestroy () {
-    window.removeEventListener('resize', this.getViewSize)
-  },
-  render () {
+  render (h) {
     return (
       <div ref="table" class="crab-table">
-        {this.renderHead()}
-        {this.renderStickyBody()}
-        {this.renderDefaultBody()}
+        {renderFun.renderHead.call(this, h)}
+        {renderFun.renderStickyBody.call(this, h)}
+        {renderFun.renderDefaultBody.call(this, h)}
       </div>
     )
   }

@@ -5,8 +5,8 @@
       :key="head.field"
       :style="{width:head.width+'px'}"
       :head="head"
-    >
-    </TableHeadCell>
+      @sortData="sortData"
+    />
   </div>
 </template>
 
@@ -26,7 +26,9 @@ export default {
   created () {
   },
   methods: {
-
+    sortData (head) {
+      this.$emit('sortData', head)
+    }
   }
 }
 </script>

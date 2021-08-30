@@ -40,13 +40,13 @@ function addEventListener (el) {
   function transitionend () {
     if (el.offsetHeight) {
       el.style.height = ''
-      if (process.env.NODE_ENV === 'development') {
-        setTimeout(() => {
-          if (el.offsetHeight !== getchildHeight(el)) {
-            console.warn('zoom:v-transition', '高度异常，请保证v-transition有单一子节点。')
-          }
-        }, 0)
-      }
+      // if (process.env.NODE_ENV === 'development') {
+      //   setTimeout(() => {
+      //     if (el.offsetHeight !== getchildHeight(el)) {
+      //       console.warn('zoom:v-transition', '高度异常，请保证v-transition有单一子节点。')
+      //     }
+      //   }, 0)
+      // }
     } else {
       el.style.display = 'none'
     }

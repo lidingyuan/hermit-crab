@@ -1,14 +1,22 @@
 <template>
   <div class="table-head-cell">
-    <TableCell style="flex-grow:1;">{{head.name}}</TableCell>
-    <div class="table-head-row" v-if="head.children.length">
+    <TableCell
+      style="flex-grow:1;"
+      @click="$emit('sortData',head)"
+    >
+      {{ head.name }}
+    </TableCell>
+    <div
+      v-if="head.children.length"
+      class="table-head-row"
+    >
       <TableHeadCell
-        v-for="head in head.children"
-        :key="head.field"
-        :style="{width:head.width+'px'}"
-        :head="head"
-      >
-      </TableHeadCell>
+        v-for="child in head.children"
+        :key="child.field"
+        :style="{width:child.width+'px'}"
+        :head="child"
+        @sortData="sortData"
+      />
     </div>
   </div>
 </template>
@@ -19,16 +27,10 @@ export default {
   name: 'TableHeadCell',
   components: { TableCell },
   props: { head: Object },
-  data () {
-    return {
-
-    }
-  },
-  created () {
-
-  },
   methods: {
-
+    sortData (head) {
+      this.$emit('sortData', head)
+    }
   }
 }
 </script>

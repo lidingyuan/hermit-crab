@@ -1,21 +1,14 @@
-<template>
-  <div ref="table-cell" class="table-cell" v-active>
-    <slot></slot>
+<template functional>
+  <div
+    class="table-cell"
+    :style="{...data.style,...data.staticStyle}"
+    :rowIndex="props.rowIndex"
+    :colIndex="props.colIndex"
+    @click="listeners && listeners.click?listeners.click():''"
+  >
+    <slot />
   </div>
 </template>
-
-<script>
-export default {
-  name: 'TableCell',
-  data () {
-    return {
-    }
-  },
-  methods: {
-
-  }
-}
-</script>
 
 <style lang='scss' scoped>
 .table-cell{
