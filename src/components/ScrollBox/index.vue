@@ -1,23 +1,28 @@
 <template>
   <div
-    class="scroll-box"
     ref="scroll-box"
+    class="scroll-box"
     :style="boxStyle"
   >
-    <div @mouseover="hover(true)" @mouseleave="hover(false)" class="scroll-view" ref="scroll-view" @scroll="scroll" :style="{height:`calc(100% + ${hideYWidth}px)`,width:`calc(100% + ${hideXWidth}px)`}">
-      <slot></slot>
+    <div
+      ref="scroll-view"
+      class="scroll-view"
+      :style="{height:`calc(100% + ${hideYWidth}px)`,width:`calc(100% + ${hideXWidth}px)`}"
+      @mouseover="hover(true)"
+      @mouseleave="hover(false)"
+      @scroll="scroll"
+    >
+      <slot />
       <div
-        @mousedown="beginScroll($event,'Y')"
         class="bar-y"
         :style="{height:coefficientY * 100 + '%',backgroundColor: showBar.Y ? backgroundColor : '',transform: 'translate3d(0, '+barYTop+', 0)'}"
-      >
-      </div>
+        @mousedown="beginScroll($event,'Y')"
+      />
       <div
-        @mousedown="beginScroll($event,'X')"
         class="bar-x"
         :style="{width:coefficientX * 100 + '%',backgroundColor: showBar.X ? backgroundColor : '',transform: 'translate3d('+barXLeft+', 0, 0)'}"
-      >
-      </div>
+        @mousedown="beginScroll($event,'X')"
+      />
     </div>
   </div>
 </template>
@@ -93,6 +98,11 @@ export default {
     window.addEventListener('resize', this.listener)
     this.computeBarWidth()
   },
+  beforeDestroy () {
+    document.removeEventListener('mousemove', this.moveScroll)
+    document.removeEventListener('mouseup', this.endScroll)
+    window.removeEventListener('resize', this.listener)
+  },
   methods: {
     //
     hover (b) {
@@ -148,11 +158,6 @@ export default {
       document.removeEventListener('mousemove', this.moveScroll)
       document.removeEventListener('mouseup', this.endScroll)
     }
-  },
-  beforeDestroy () {
-    document.removeEventListener('mousemove', this.moveScroll)
-    document.removeEventListener('mouseup', this.endScroll)
-    window.removeEventListener('resize', this.listener)
   }
 }
 </script>

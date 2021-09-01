@@ -1,11 +1,18 @@
 <template>
-  <scroll-box style="height:100%;width:100%;" @scrollChange="scrollChange">
-    <div class="drag-box-base" @mousemove="mousemove($event)" @mouseup="mouseup($event)">
+  <scroll-box
+    style="height:100%;width:100%;"
+    @scrollChange="scrollChange"
+  >
+    <div
+      class="drag-box-base"
+      @mousemove="mousemove($event)"
+      @mouseup="mouseup($event)"
+    >
       <template v-for="(arr,colIndex) in value">
         <div
+          :key="colIndex+'-drag-box'"
           class="drag-box"
           :style="{width:100/value.length+'%'}"
-          :key="colIndex+'-drag-box'"
         >
           <div
             v-for="(item,index) in arr"
@@ -14,16 +21,26 @@
             class="drag-block-base"
           >
             <div
-              @mousedown="mousedown($event,item,index,colIndex)"
               :ref="(dragKey?item[dragKey]:item)"
               :style="index | top(pickIndex,passNum,height,colIndex,nowColIndex,pickColIndex)"
               :class="{'drag-block--absolute':!!pickUp && pickUp !== (dragKey?item[dragKey]:item),'drag-block--pick':pickUp === (dragKey?item[dragKey]:item)}"
+              @mousedown="mousedown($event,item,index,colIndex)"
             >
-              <slot :item="item" :index="index" :colIndex="colIndex">{{item}}</slot>
+              <slot
+                :item="item"
+                :index="index"
+                :colIndex="colIndex"
+              >
+                {{ item }}
+              </slot>
             </div>
           </div>
         </div>
-        <div class="divider" :key="colIndex+'-divider'" v-if="colIndex !== value.length-1"></div>
+        <div
+          v-if="colIndex !== value.length-1"
+          :key="colIndex+'-divider'"
+          class="divider"
+        />
       </template>
     </div>
   </scroll-box>
@@ -36,6 +53,32 @@ export default {
   name: 'DragBoxPlural',
   components: {
     ScrollBox
+  },
+  filters: {
+    top (index, pickIndex, passNum, height, colIndex, nowColIndex, pickColIndex) {
+      let top = 0
+      if (colIndex === nowColIndex && nowColIndex === pickColIndex) {
+        if ((pickIndex + passNum) < index && index < pickIndex) {
+          top = height
+        }
+        if ((pickIndex + passNum) > index && index > pickIndex) {
+          top = -height
+        }
+      }
+      if (colIndex === nowColIndex && nowColIndex !== pickColIndex) {
+        if ((pickIndex + passNum) <= index) {
+          top = height
+        }
+      }
+      if (colIndex === pickColIndex && pickColIndex !== nowColIndex) {
+        if (pickIndex < index) {
+          top = -height
+        }
+      }
+
+      return { top: top + 'px' }
+    }
+
   },
   props: {
     value: {
@@ -89,32 +132,6 @@ export default {
     this.value.forEach((arr, i) => {
       this.list[i] = [...arr]
     })
-  },
-  filters: {
-    top (index, pickIndex, passNum, height, colIndex, nowColIndex, pickColIndex) {
-      let top = 0
-      if (colIndex === nowColIndex && nowColIndex === pickColIndex) {
-        if ((pickIndex + passNum) < index && index < pickIndex) {
-          top = height
-        }
-        if ((pickIndex + passNum) > index && index > pickIndex) {
-          top = -height
-        }
-      }
-      if (colIndex === nowColIndex && nowColIndex !== pickColIndex) {
-        if ((pickIndex + passNum) <= index) {
-          top = height
-        }
-      }
-      if (colIndex === pickColIndex && pickColIndex !== nowColIndex) {
-        if (pickIndex < index) {
-          top = -height
-        }
-      }
-
-      return { top: top + 'px' }
-    }
-
   },
   methods: {
     //

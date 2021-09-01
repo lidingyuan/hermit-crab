@@ -1,6 +1,11 @@
 <template functional>
-  <div class="button" :class="{plain:props.plain}" v-active @click="listeners.click">
-    <slot></slot>
+  <div
+    v-active
+    class="button"
+    :class="{plain:props.plain}"
+    @click="(e)=>{listeners && listeners.click && listeners.click(e)}"
+  >
+    <slot />
   </div>
 </template>
 

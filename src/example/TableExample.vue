@@ -1,17 +1,26 @@
 <template>
   <div class="table-example">
     表格例子，支持多级表头，固定行固定列，虚拟滚动，复制粘贴(excel)，排序等
-        预计添加：
-          1.动态配置表格结构
+    预计添加：
+    1.动态配置表格结构
     <CrabTable
-      style="width:100%;height:600px;overflow: hidden;"
-      :virtualCol="9"
-      :columnList="columnList"
-      :dataList="dataList"
-      :stickyRows="3"
+      style="width:100%;height:80vh;overflow: hidden;"
+      :virtual-col="9"
+      :column-list="columnList"
+      :data-list="dataList"
+      :sticky-rows="3"
     >
-      <template #test1="{rowIndex}">
-        {{rowIndex}}
+      <template #test4="{rowIndex}">
+        {{ rowIndex }}
+      </template>
+      <template #test10="{row}">
+        <input v-model="row.test10">
+      </template>
+      <template #test11="{row}">
+        {{ row.test10 }}
+      </template>
+      <template #test12="{row}">
+        <Button>{{ row.test12 || '按钮' }}</Button>
       </template>
     </CrabTable>
   </div>
@@ -19,9 +28,10 @@
 
 <script>
 import CrabTable from '../components/Table'
+import Button from '../components/Button'
 export default {
   name: 'TableExample',
-  components: { CrabTable },
+  components: { CrabTable, Button },
   data () {
     return {
       columnList: [

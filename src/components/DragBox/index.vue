@@ -1,6 +1,12 @@
 <template>
-  <scroll-box style="height:100%;width:100%;" @scrollChange="scrollChange">
-    <div @mousemove="mousemove($event)" @mouseup="mouseup($event)">
+  <scroll-box
+    style="height:100%;width:100%;"
+    @scrollChange="scrollChange"
+  >
+    <div
+      @mousemove="mousemove($event)"
+      @mouseup="mouseup($event)"
+    >
       <div
         v-for="(item,index) in value"
         :key="dragKey?item[dragKey]:item"
@@ -8,12 +14,17 @@
         class="drag-block-base"
       >
         <div
-          @mousedown="mousedown($event,item,index)"
           :ref="dragKey?item[dragKey]:item"
           :style="{top:((pickIndex+passNum)<index && index<pickIndex)?height+'px':((pickIndex+passNum)>index && index>pickIndex)?-height+'px':'0px'}"
           :class="{'drag-block--absolute':!!pickUp && pickUp !== (dragKey?item[dragKey]:item),'drag-block--pick':pickUp === (dragKey?item[dragKey]:item)}"
+          @mousedown="mousedown($event,item,index)"
         >
-          <slot :item="item" :index="index">{{item}}</slot>
+          <slot
+            :item="item"
+            :index="index"
+          >
+            {{ item }}
+          </slot>
         </div>
       </div>
     </div>
