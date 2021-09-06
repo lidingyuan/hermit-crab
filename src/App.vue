@@ -5,6 +5,10 @@
       :active-menu.sync="show"
     />
     <div class="content">
+      <WaterMark
+        :text="show"
+        :opacity="0.3"
+      />
       <DragExample v-if="show === 'DragExample'" />
       <TableExample v-if="show === 'TableExample'" />
       <QueryExample v-if="show === 'QueryExample'" />
@@ -13,13 +17,14 @@
 </template>
 
 <script>
-import DragExample from './example/DragExample.vue'
-import TableExample from './example/TableExample.vue'
-import QueryExample from './example/QueryExample.vue'
+import DragExample from './example/DragExample'
+import TableExample from './example/TableExample'
+import QueryExample from './example/QueryExample'
 import LayoutSiderbar from './components/LayoutSiderbar'
+import WaterMark from './components/WaterMark'
 export default {
   name: 'App',
-  components: { DragExample, TableExample, QueryExample, LayoutSiderbar },
+  components: { DragExample, TableExample, QueryExample, LayoutSiderbar, WaterMark },
   data () {
     return {
       show: 'TableExample',
@@ -51,5 +56,6 @@ body{
 .content{
   width: 0;
   flex-grow: 1;
+  position: relative;
 }
 </style>

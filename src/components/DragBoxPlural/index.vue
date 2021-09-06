@@ -5,7 +5,6 @@
   >
     <div
       class="drag-box-base"
-      @mousemove="mousemove($event)"
       @mouseup="mouseup($event)"
     >
       <template v-for="(arr,colIndex) in value">
@@ -23,7 +22,10 @@
             <div
               :ref="(dragKey?item[dragKey]:item)"
               :style="index | top(pickIndex,passNum,height,colIndex,nowColIndex,pickColIndex)"
-              :class="{'drag-block--absolute':!!pickUp && pickUp !== (dragKey?item[dragKey]:item),'drag-block--pick':pickUp === (dragKey?item[dragKey]:item)}"
+              :class="{
+                'drag-block--absolute':!!pickUp && pickUp !== (dragKey?item[dragKey]:item),
+                'drag-block--pick':pickUp === (dragKey?item[dragKey]:item)
+              }"
               @mousedown="mousedown($event,item,index,colIndex)"
             >
               <slot
@@ -132,6 +134,10 @@ export default {
     this.value.forEach((arr, i) => {
       this.list[i] = [...arr]
     })
+    window.addEventListener('resize', this.fixBaseSize)
+  },
+  beforeDestroy () {
+    window.removeEventListener('resize', this.fixBaseSize)
   },
   methods: {
     //
@@ -139,10 +145,16 @@ export default {
       this.list.forEach((col, colIndex) => {
         col.forEach(item => {
           const ref = this.dragKey ? item[this.dragKey] : item
-          this.$refs[ref + '-base'][0].style.height = this.$refs[ref][0].clientHeight + 'px'
-          this.$refs[ref + '-base'][0].style.width = this.$refs[ref][0].clientWidth + 'px'
-          this.$refs[ref][0].style.height = this.$refs[ref][0].clientHeight + 'px'
-          this.$refs[ref][0].style.width = this.$refs[ref][0].clientWidth + 'px'
+          this.$refs[ref + '-base'][0].style.height = ''
+          this.$refs[ref + '-base'][0].style.width = ''
+          this.$refs[ref][0].style.height = ''
+          this.$refs[ref][0].style.width = ''
+          Promise.resolve().then(() => {
+            this.$refs[ref + '-base'][0].style.height = this.$refs[ref][0].clientHeight + 'px'
+            this.$refs[ref + '-base'][0].style.width = this.$refs[ref][0].clientWidth + 'px'
+            this.$refs[ref][0].style.height = this.$refs[ref][0].clientHeight + 'px'
+            this.$refs[ref][0].style.width = this.$refs[ref][0].clientWidth + 'px'
+          })
         })
       })
     },
@@ -157,13 +169,17 @@ export default {
         this.pickColIndex = colIndex
         this.nowColIndex = colIndex
         this.beginY = event.y
-        this.beginX = event.x
+        this.beginX = event.x - event.offsetX
         this.scrollYBegin = this.scrollY
-        setTimeout(() => {
-          this.height = this.pickUpDom.clientHeight
-          this.width = this.pickUpDom.clientWidth
-        }, 0)
+        this.moveY = event.y
+        this.moveX = event.x
+        this.layerX = event.layerX
+
+        this.height = this.pickUpDom.clientHeight
+        this.width = this.pickUpDom.clientWidth
+        this.move()
       }, 100)
+      document.body.addEventListener('mousemove', this.mousemove)
     },
     mouseup (event) {
       clearTimeout(this.timeout)
@@ -194,6 +210,7 @@ export default {
       this.pickColIndex = 0
       this.nowColIndex = 0
       this.pickUp = ''
+      document.body.removeEventListener('mousemove', this.mousemove)
     },
     mousemove (event) {
       if (this.pickUp) {
@@ -204,12 +221,12 @@ export default {
       }
     },
     move () {
-      this.changeCol(this.moveX - this.beginX + this.layerX, this.width)
-      const moveYNum = this.moveY - this.beginY + this.scrollY - this.scrollYBegin
-      const moveXNum = this.moveX - this.beginX
-      this.pickUpDom.style.top = moveYNum + 'px'
-      this.pickUpDom.style.left = moveXNum + 'px'
-      this.passNum = moveYNum / this.height
+      this.changeCol(this.moveX - this.beginX, this.width)
+      const moveYNum = this.moveY
+      const moveXNum = this.moveX
+      this.pickUpDom.style.top = moveYNum - (this.pickUpDom.clientHeight / 2) + 'px'
+      this.pickUpDom.style.left = moveXNum - (this.pickUpDom.clientWidth / 2) + 'px'
+      this.passNum = (moveYNum - this.beginY + this.scrollY - this.scrollYBegin) / this.height
     },
     changeCol (move, width) {
       const changeIndex = Math.floor(move / width)
@@ -261,9 +278,10 @@ export default {
     width: 100%;
   }
   .drag-block--pick{
-    position: absolute;
+    position: fixed;
     z-index: 1;
     opacity: 0.5;
     width: 100%;
+    pointer-events: none;
   }
 </style>

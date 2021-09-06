@@ -265,33 +265,31 @@ export default {
         return
       }
       this.rendering = true
-      setTimeout(() => {
-        if (this.virtualBeginRow === undefined || this.virtualBeginRow === -1) {
-          this.renderDataList = this.dataList
-        } else {
-          let begin = this.virtualBeginRow - parseInt(0.5 * this.virtualRowSize)
-          if (begin < 0) {
-            begin = 0
-          }
-          const end = this.virtualBeginRow + parseInt(1.5 * this.virtualRowSize)
-          this.renderDataList = this.dataList.slice(begin, end)
-          this.transformY = this.dataList[begin]?.transformY
+      if (this.virtualBeginRow === undefined || this.virtualBeginRow === -1) {
+        this.renderDataList = this.dataList
+      } else {
+        let begin = this.virtualBeginRow - parseInt(0.5 * this.virtualRowSize)
+        if (begin < 0) {
+          begin = 0
         }
-        if (this.virtualBeginCol === undefined || this.virtualBeginCol === -1) {
-          this.renderDataProp = this.dataProp
-        } else {
-          const renderDataProp = {}
-          Object.keys(this.dataProp).slice(this.virtualBeginCol, this.virtualBeginCol + this.virtualColSize).forEach(key => {
-            renderDataProp[key] = this.dataProp[key]
-          })
-          this.renderDataProp = renderDataProp
-          this.transformX = Object.values(this.dataProp)[this.virtualBeginCol]?.transformX
-        }
-        this.$nextTick(() => {
-          this.computeHeight(force)
-          this.rendering = false
+        const end = this.virtualBeginRow + parseInt(1.5 * this.virtualRowSize)
+        this.renderDataList = this.dataList.slice(begin, end)
+        this.transformY = this.dataList[begin]?.transformY
+      }
+      if (this.virtualBeginCol === undefined || this.virtualBeginCol === -1) {
+        this.renderDataProp = this.dataProp
+      } else {
+        const renderDataProp = {}
+        Object.keys(this.dataProp).slice(this.virtualBeginCol, this.virtualBeginCol + this.virtualColSize).forEach(key => {
+          renderDataProp[key] = this.dataProp[key]
         })
-      }, 0)
+        this.renderDataProp = renderDataProp
+        this.transformX = Object.values(this.dataProp)[this.virtualBeginCol]?.transformX
+      }
+      this.$nextTick(() => {
+        this.computeHeight(force)
+        this.rendering = false
+      })
     },
     computeHeight (force) {
       this.useRenderRowHeight = new Array(this.renderDataList.length).fill('auto')
@@ -356,7 +354,7 @@ export default {
   },
   debounces: {
     renderByScroll (finish) {
-      finish(50).then(() => {
+      finish(20).then(() => {
         this.render()
       })
     }

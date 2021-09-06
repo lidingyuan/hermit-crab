@@ -4,7 +4,6 @@
     @scrollChange="scrollChange"
   >
     <div
-      @mousemove="mousemove($event)"
       @mouseup="mouseup($event)"
     >
       <div
@@ -130,11 +129,11 @@ export default {
       }
     },
     move () {
-      const moveYNum = this.moveY - this.beginY + this.scrollY - this.scrollYBegin
-      const moveXNum = this.moveX - this.beginX
-      this.pickUpDom.style.top = moveYNum + 'px'
-      this.pickUpDom.style.left = moveXNum + 'px'
-      this.passNum = moveYNum / this.height
+      const moveYNum = this.moveY
+      const moveXNum = this.moveX
+      this.pickUpDom.style.top = moveYNum - (this.pickUpDom.clientHeight / 2) + 'px'
+      this.pickUpDom.style.left = moveXNum - (this.pickUpDom.clientWidth / 2) + 'px'
+      this.passNum = (moveYNum - this.beginY + this.scrollY - this.scrollYBegin) / this.height
     },
     scrollChange (x, y) {
       this.scrollY = x
@@ -168,8 +167,10 @@ export default {
     transition: top 0.5s;
   }
   .drag-block--pick{
-    position: absolute;
+    position: fixed;
     z-index: 1;
     opacity: 0.5;
+    width: 100%;
+    pointer-events: none;
   }
 </style>

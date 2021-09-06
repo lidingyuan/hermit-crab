@@ -8,6 +8,12 @@
       :virtual-col="9"
       :column-list="columnList"
       :data-list="dataList"
+    />
+    <CrabTable
+      style="width:100%;height:80vh;overflow: hidden;"
+      :virtual-col="9"
+      :column-list="columnList"
+      :data-list="dataList"
       :sticky-rows="3"
     >
       <template #test4="{rowIndex}">
@@ -525,5 +531,12 @@ export default {
 </script>
 
 <style lang='scss' scoped>
-
+.table-example{
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: scroll;
+  padding: 20px;
+  box-sizing: border-box;
+}
 </style>

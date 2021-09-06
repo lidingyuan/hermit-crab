@@ -15,8 +15,13 @@ export default {
     }
     return (
       <i
-        class={classMap[context.props.type][context.props.check] + ' zl-check-box'}
+        class={classMap[context.props.type][context.props.check] + ' zl-check-icon'}
         aria-hidden="true"
+        {...{
+          on: {
+            ...context.listeners
+          }
+        }}
       />
     )
   }
@@ -24,7 +29,12 @@ export default {
 </script>
 
 <style lang='scss' scoped>
-.zl-check-box{
+.zl-check-icon{
+  width: 16px;
+  height: 16px;
   margin-right: 8px;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
 }
 </style>

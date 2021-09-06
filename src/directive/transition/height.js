@@ -1,7 +1,7 @@
 export default {
   inserted (el, binding) {
     addEventListener(el)
-    el.style.transition = 'all 0.5s'
+    el.style.transition = 'height 0.5s'
     el.style.overflow = 'hidden'
     if (binding.value) {
       el.style.height = ''
@@ -37,19 +37,16 @@ function getchildHeight (el) {
   return height
 }
 function addEventListener (el) {
-  function transitionend () {
+  function transitionend (e) {
+    if (e.propertyName !== 'height') {
+      return
+    }
+    e.stopPropagation()
     if (el.offsetHeight) {
       el.style.height = ''
-      // if (process.env.NODE_ENV === 'development') {
-      //   setTimeout(() => {
-      //     if (el.offsetHeight !== getchildHeight(el)) {
-      //       console.warn('zoom:v-transition', '高度异常，请保证v-transition有单一子节点。')
-      //     }
-      //   }, 0)
-      // }
     } else {
       el.style.display = 'none'
     }
   }
-  el.addEventListener('transitionend', transitionend)
+  el.addEventListener('transitionend', transitionend, false)
 }

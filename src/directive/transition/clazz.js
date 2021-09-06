@@ -21,6 +21,9 @@ export default {
     }
   },
   update (el, binding) {
+    if (binding.oldValue === binding.value) {
+      return
+    }
     if (binding.value) {
       el.style.display = ''
       setTimeout(() => {
