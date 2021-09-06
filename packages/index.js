@@ -1,6 +1,5 @@
 import RecordParam from '@/utils/RecordParam'
 import ScrollBox from '@/components/ScrollBox'
-import DragBox from '@/components/DragBox'
 import DragBoxPlural from '@/components/DragBoxPlural'
 import CrabTable from '@/components/Table'
 
@@ -8,7 +7,6 @@ import directive from '@/directive'
 
 const components = [
   ScrollBox,
-  DragBox,
   DragBoxPlural,
   CrabTable
 ]
@@ -37,6 +35,5 @@ export default {
   // 以下是具体的组件列表
   RecordParam,
   ScrollBox,
-  DragBox,
   DragBoxPlural
 }
