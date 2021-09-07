@@ -8,7 +8,7 @@
       ref="scroll-view"
       class="scroll-view"
       :style="{height:`calc(100% + ${hideYWidth}px)`,width:`calc(100% + ${hideXWidth}px)`}"
-      @mouseover="hover(true)"
+      @mouseenter="hover(true)"
       @mouseleave="hover(false)"
       @scroll="scroll"
     >
@@ -106,6 +106,9 @@ export default {
   methods: {
     //
     hover (b) {
+      const el = this.$refs['scroll-view']
+      this.coefficientY = el.clientHeight / el.scrollHeight
+      this.coefficientX = el.clientWidth / el.scrollWidth
       this.showBar.Y = false
       this.showBar.X = false
       if (this.coefficientY < 1 && this.hideYWidth !== 0) {

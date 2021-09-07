@@ -18,7 +18,7 @@ export default {
       default: 32
     },
     color: {
-      type: String,
+      type: [String, Array],
       default: '#cec'
     },
     deg: {
@@ -48,12 +48,15 @@ export default {
       const cos = Math.cos(this.deg * Math.PI / 180)
       ctx.translate(cos < 0 ? canvas.width - (this.fontSize / 4) : this.fontSize / 2, sin < 0 ? canvas.height - (this.fontSize / 4) : this.fontSize / 2)
       ctx.rotate(this.deg * Math.PI / 180)
-      // const gr = ctx.createLinearGradient(0, 0, canvas.width, 0)
-      // gr.addColorStop(0, 'rgb(255,0,0)')
-      // gr.addColorStop(0.5, 'rgb(0,255,0)')
-      // gr.addColorStop(1, 'rgb(0,0,255)')
-      // ctx.fillStyle = gr
-      ctx.fillStyle = this.color
+      if (this.color.length) {
+        const gr = ctx.createLinearGradient(0, 0, canvas.width, 0)
+        this.color.forEach((color, index) => {
+          gr.addColorStop(index / this.color.length, color)
+        })
+        ctx.fillStyle = gr
+      } else {
+        ctx.fillStyle = this.color
+      }
       const fontargs = ctx.font.split(' ')
       ctx.font = this.fontSize + 'px ' + fontargs[fontargs.length - 1]
       ctx.fillText(this.text, 0, 0)

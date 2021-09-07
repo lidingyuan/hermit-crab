@@ -8,6 +8,7 @@
       <WaterMark
         :text="show"
         :opacity="0.3"
+        :color="['green','blue']"
       />
       <DragExample v-if="show === 'DragExample'" />
       <TableExample v-if="show === 'TableExample'" />

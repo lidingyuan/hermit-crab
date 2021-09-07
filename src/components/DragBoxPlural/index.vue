@@ -1,43 +1,44 @@
 <template>
-  <scroll-box
+  <div
     style="height:100%;width:100%;"
-    @scrollChange="scrollChange"
   >
     <div
       class="drag-box-base"
       @mouseup="mouseup($event)"
     >
       <template v-for="(arr,colIndex) in value">
-        <div
+        <scroll-box
           :key="colIndex+'-drag-box'"
           class="drag-box"
           :style="{width:100/value.length+'%'}"
+          @mouseenter.native="mouseenterCol(colIndex)"
         >
           <div
             v-for="(item,index) in arr"
             :key="dragKey?item[dragKey]:item"
-            :ref="(dragKey?item[dragKey]:item)+'-base'"
-            class="drag-block-base"
+            :ref="colIndex+'-'+index"
+            :style="{
+              'margin-top':nowColIndex===colIndex && nowIndex===index?height+'px':'0',
+              transition: pickIndex>-1 && pickColIndex>-1 && (pickIndex!==index || pickColIndex!==colIndex)?'all 0.5s':'none',
+              top:pickIndex===index && pickColIndex===colIndex?top:0,
+              left:pickIndex===index && pickColIndex===colIndex?left:0,
+              width:pickIndex===index && pickColIndex===colIndex?width+'px' : '',
+              height:pickIndex===index && pickColIndex===colIndex?height+'px' : ''
+            }"
+            class="drag-block"
+            :class="{'drag-block--pick':pickIndex===index && pickColIndex===colIndex}"
+            @mousedown="mousedown($event,index,colIndex)"
+            @mouseenter="mouseenter(index,colIndex)"
           >
-            <div
-              :ref="(dragKey?item[dragKey]:item)"
-              :style="index | top(pickIndex,passNum,height,colIndex,nowColIndex,pickColIndex)"
-              :class="{
-                'drag-block--absolute':!!pickUp && pickUp !== (dragKey?item[dragKey]:item),
-                'drag-block--pick':pickUp === (dragKey?item[dragKey]:item)
-              }"
-              @mousedown="mousedown($event,item,index,colIndex)"
+            <slot
+              :item="item"
+              :index="index"
+              :colIndex="colIndex"
             >
-              <slot
-                :item="item"
-                :index="index"
-                :colIndex="colIndex"
-              >
-                {{ item }}
-              </slot>
-            </div>
+              {{ item }}
+            </slot>
           </div>
-        </div>
+        </scroll-box>
         <div
           v-if="colIndex !== value.length-1"
           :key="colIndex+'-divider'"
@@ -45,7 +46,7 @@
         />
       </template>
     </div>
-  </scroll-box>
+  </div>
 </template>
 
 <script>
@@ -55,32 +56,6 @@ export default {
   name: 'DragBoxPlural',
   components: {
     ScrollBox
-  },
-  filters: {
-    top (index, pickIndex, passNum, height, colIndex, nowColIndex, pickColIndex) {
-      let top = 0
-      if (colIndex === nowColIndex && nowColIndex === pickColIndex) {
-        if ((pickIndex + passNum) < index && index < pickIndex) {
-          top = height
-        }
-        if ((pickIndex + passNum) > index && index > pickIndex) {
-          top = -height
-        }
-      }
-      if (colIndex === nowColIndex && nowColIndex !== pickColIndex) {
-        if ((pickIndex + passNum) <= index) {
-          top = height
-        }
-      }
-      if (colIndex === pickColIndex && pickColIndex !== nowColIndex) {
-        if (pickIndex < index) {
-          top = -height
-        }
-      }
-
-      return { top: top + 'px' }
-    }
-
   },
   props: {
     value: {
@@ -96,26 +71,16 @@ export default {
     return {
       //
       list: [],
-      scrollY: 0,
-      pickUp: '',
-      passNum: 0,
-      pickIndex: 0,
-      pickColIndex: 0,
-      nowColIndex: 0,
+      pickIndex: -1,
+      pickColIndex: -1,
+      nowColIndex: -1,
+      nowIndex: -1,
       timeout: null,
       moveY: 0,
       moveX: 0,
-      layerX: 0,
-      beginY: 0,
-      beginX: 0,
-      scrollYBegin: 0,
-      height: 0,
-      width: 0
-    }
-  },
-  computed: {
-    pickUpDom () {
-      return this.$refs[this.pickUp][0]
+      height: null,
+      width: null,
+      pickUpDom: null
     }
   },
   watch: {
@@ -129,116 +94,78 @@ export default {
       }
     }
   },
+  computed: {
+    top () {
+      return this.moveY - (this.height / 2) + 'px'
+    },
+    left () {
+      return this.moveX - (this.width / 2) + 'px'
+    }
+  },
   created () {
     this.list = [...this.value]
     this.value.forEach((arr, i) => {
       this.list[i] = [...arr]
     })
-    window.addEventListener('resize', this.fixBaseSize)
-  },
-  beforeDestroy () {
-    window.removeEventListener('resize', this.fixBaseSize)
   },
   methods: {
     //
-    fixBaseSize () {
-      this.list.forEach((col, colIndex) => {
-        col.forEach(item => {
-          const ref = this.dragKey ? item[this.dragKey] : item
-          this.$refs[ref + '-base'][0].style.height = ''
-          this.$refs[ref + '-base'][0].style.width = ''
-          this.$refs[ref][0].style.height = ''
-          this.$refs[ref][0].style.width = ''
-          Promise.resolve().then(() => {
-            this.$refs[ref + '-base'][0].style.height = this.$refs[ref][0].clientHeight + 'px'
-            this.$refs[ref + '-base'][0].style.width = this.$refs[ref][0].clientWidth + 'px'
-            this.$refs[ref][0].style.height = this.$refs[ref][0].clientHeight + 'px'
-            this.$refs[ref][0].style.width = this.$refs[ref][0].clientWidth + 'px'
-          })
-        })
-      })
-    },
-    mousedown (event, option, index, colIndex) {
-      if (this.pickUp) {
+    mousedown (event, index, colIndex) {
+      if (this.pickColIndex !== -1 && this.pickIndex !== -1) {
         return
       }
-      this.fixBaseSize()
       this.timeout = setTimeout(() => {
-        this.pickUp = this.dragKey ? option[this.dragKey] : option
+        this.pickUpDom = this.$refs[colIndex + '-' + index][0]
+        this.moveY = event.y
+        this.moveX = event.x
         this.pickIndex = index
         this.pickColIndex = colIndex
         this.nowColIndex = colIndex
-        this.beginY = event.y
-        this.beginX = event.x - event.offsetX
-        this.scrollYBegin = this.scrollY
-        this.moveY = event.y
-        this.moveX = event.x
-        this.layerX = event.layerX
 
         this.height = this.pickUpDom.clientHeight
         this.width = this.pickUpDom.clientWidth
-        this.move()
       }, 100)
       document.body.addEventListener('mousemove', this.mousemove)
     },
-    mouseup (event) {
-      clearTimeout(this.timeout)
-      if (!this.pickUp) {
+    mouseenter (index, colIndex) {
+      if (this.pickColIndex === -1 || this.pickIndex === -1) {
         return
       }
-      if (this.passNum || this.pickColIndex !== this.nowColIndex) {
-        const item = this.list[this.pickColIndex].splice(this.pickIndex, 1)
-        let index = this.pickIndex + this.passNum
-        if (this.passNum > 0) {
-          if (this.pickColIndex !== this.nowColIndex) {
-            index++
-          }
-          this.list[this.nowColIndex].splice(index, 0, item[0])
-        } else {
-          index++
-          this.list[this.nowColIndex].splice(index, 0, item[0])
-        }
-        this.$emit('input', this.list)
+      if (colIndex === this.nowColIndex) {
+        this.nowIndex = index
       }
-      this.beginY = 0
-      this.beginX = 0
-      this.passNum = 0
-      this.pickUpDom.style.top = '0px'
-      this.pickUpDom.style.left = '0px'
+    },
+    mouseenterCol (colIndex) {
+      if (this.pickColIndex === -1 || this.pickIndex === -1) {
+        return
+      }
+      this.nowColIndex = colIndex
+      this.nowIndex = this.list[colIndex].length
+    },
+    mouseup () {
+      clearTimeout(this.timeout)
+      if (this.pickColIndex === -1 || this.pickIndex === -1) {
+        return
+      }
+      const item = this.list[this.pickColIndex].splice(this.pickIndex, 1)
+      let nowIndex = this.nowIndex
+      if (nowIndex > this.pickIndex && this.pickColIndex === this.nowColIndex) {
+        nowIndex--
+      }
+      this.list[this.nowColIndex].splice(nowIndex, 0, item[0])
+      this.$emit('input', this.list)
 
-      this.pickIndex = 0
-      this.pickColIndex = 0
-      this.nowColIndex = 0
-      this.pickUp = ''
+      this.pickIndex = -1
+      this.pickColIndex = -1
+      this.nowColIndex = -1
+      this.nowIndex = -1
+      this.pickUpDom = null
       document.body.removeEventListener('mousemove', this.mousemove)
     },
     mousemove (event) {
-      if (this.pickUp) {
+      if (this.pickColIndex !== -1 && this.pickIndex !== -1) {
         this.moveY = event.y
         this.moveX = event.x
-        this.layerX = event.layerX
-        this.move()
-      }
-    },
-    move () {
-      this.changeCol(this.moveX - this.beginX, this.width)
-      const moveYNum = this.moveY
-      const moveXNum = this.moveX
-      this.pickUpDom.style.top = moveYNum - (this.pickUpDom.clientHeight / 2) + 'px'
-      this.pickUpDom.style.left = moveXNum - (this.pickUpDom.clientWidth / 2) + 'px'
-      this.passNum = (moveYNum - this.beginY + this.scrollY - this.scrollYBegin) / this.height
-    },
-    changeCol (move, width) {
-      const changeIndex = Math.floor(move / width)
-      const nowColIndex = this.pickColIndex + changeIndex
-      if (nowColIndex > -1 && nowColIndex < this.list.length) {
-        this.nowColIndex = nowColIndex
-      }
-    },
-    scrollChange (x, y) {
-      this.scrollY = x
-      if (this.pickUp) {
-        this.move()
       }
     }
   }
@@ -256,32 +183,23 @@ export default {
     background: #F5F7FA;
   }
 }
-.drag-block-base{
-    cursor: move;
-    position: relative;
-    width: 100%;
+.drag-block{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  &:hover{
+    background: #F5F7FA;
   }
-  .drag-block{
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    &:hover{
-      background: #F5F7FA;
-    }
-    .check-text{
-      width: 200px;
-    }
+  .check-text{
+    width: 200px;
   }
-  .drag-block--absolute{
-    position: absolute;
-    transition: top 0.5s;
-    width: 100%;
-  }
-  .drag-block--pick{
-    position: fixed;
-    z-index: 1;
-    opacity: 0.5;
-    width: 100%;
-    pointer-events: none;
-  }
+}
+.drag-block--pick{
+  transition: none;
+  position: fixed;
+  z-index: 1;
+  opacity: 0.5;
+  width: 100%;
+  pointer-events: none;
+}
 </style>
