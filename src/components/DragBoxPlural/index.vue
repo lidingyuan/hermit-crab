@@ -5,64 +5,57 @@
     <div
       class="drag-box-base"
       @mouseup="mouseup($event)"
+      @mouseenter="mouseenterBox()"
+      @mouseleave="mouseleaveBox()"
     >
-      <template v-for="(arr,colIndex) in value">
-        <scroll-box
-          :key="colIndex+'-drag-box'"
-          class="drag-box"
-          :style="{width:100/value.length+'%'}"
-          @mouseenter.native="mouseenterCol(colIndex)"
+      <div
+        v-for="(item,itemIndex) in arr"
+        :key="dragKey?item[dragKey]:item"
+        :ref="boxIndex+'-'+itemIndex"
+        :style="{
+          'margin-top':nowBoxIndex===boxIndex && nowIndex===itemIndex?height+'px':'0',
+          transition: pickIndex>-1 && !!pickBoxIndex && (pickIndex!==itemIndex || pickBoxIndex!==boxIndex)?'all 0.5s':'none',
+          top:pickIndex===itemIndex && pickBoxIndex===boxIndex?top:0,
+          left:pickIndex===itemIndex && pickBoxIndex===boxIndex?left:0,
+          width:pickIndex===itemIndex && pickBoxIndex===boxIndex?width+'px' : '',
+          height:pickIndex===itemIndex && pickBoxIndex===boxIndex?height+'px' : ''
+        }"
+        class="drag-block"
+        :class="{'drag-block--pick':pickIndex===itemIndex && pickBoxIndex===boxIndex}"
+        @mousedown="mousedown($event,itemIndex,boxIndex)"
+        @mouseenter="mouseenter(itemIndex,boxIndex)"
+      >
+        <slot
+          :item="item"
+          :index="itemIndex"
         >
-          <div
-            v-for="(item,index) in arr"
-            :key="dragKey?item[dragKey]:item"
-            :ref="colIndex+'-'+index"
-            :style="{
-              'margin-top':nowColIndex===colIndex && nowIndex===index?height+'px':'0',
-              transition: pickIndex>-1 && pickColIndex>-1 && (pickIndex!==index || pickColIndex!==colIndex)?'all 0.5s':'none',
-              top:pickIndex===index && pickColIndex===colIndex?top:0,
-              left:pickIndex===index && pickColIndex===colIndex?left:0,
-              width:pickIndex===index && pickColIndex===colIndex?width+'px' : '',
-              height:pickIndex===index && pickColIndex===colIndex?height+'px' : ''
-            }"
-            class="drag-block"
-            :class="{'drag-block--pick':pickIndex===index && pickColIndex===colIndex}"
-            @mousedown="mousedown($event,index,colIndex)"
-            @mouseenter="mouseenter(index,colIndex)"
-          >
-            <slot
-              :item="item"
-              :index="index"
-              :colIndex="colIndex"
-            >
-              {{ item }}
-            </slot>
-          </div>
-        </scroll-box>
-        <div
-          v-if="colIndex !== value.length-1"
-          :key="colIndex+'-divider'"
-          class="divider"
-        />
-      </template>
+          {{ item }}
+        </slot>
+      </div>
+      <div class="drag-block" :ref="boxIndex+'-'+arr.length" :style="{height:height+'px',width:width+'px'}"
+        @mousedown="mousedown($event,arr.length,boxIndex)"
+        @mouseenter="mouseenter(arr.length,boxIndex)"
+      ></div>
     </div>
   </div>
 </template>
 
 <script>
-import ScrollBox from '../ScrollBox'
+
+const DataMap = new WeakMap()
 
 export default {
   name: 'DragBoxPlural',
-  components: {
-    ScrollBox
-  },
   props: {
     value: {
-      type: Array,
+      type: [Array, Object],
       default: () => []
     },
     dragKey: {
+      type: String,
+      default: ''
+    },
+    boxIndex: {
       type: String,
       default: ''
     }
@@ -72,29 +65,25 @@ export default {
       //
       list: [],
       pickIndex: -1,
-      pickColIndex: -1,
-      nowColIndex: -1,
+      pickBoxIndex: null,
+      nowBoxIndex: -1,
       nowIndex: -1,
       timeout: null,
       moveY: 0,
       moveX: 0,
       height: null,
-      width: null,
-      pickUpDom: null
+      width: null
     }
   },
   watch: {
-    value: {
-      deep: true,
-      handler: function (val) {
-        this.list = []
-        val.forEach((arr, i) => {
-          this.list[i] = [...arr]
-        })
-      }
+    value () {
+      this.list = this.boxIndex ? [...this.value[this.boxIndex]] : [...this.value]
     }
   },
   computed: {
+    arr () {
+      return this.boxIndex ? this.value[this.boxIndex] : this.value
+    },
     top () {
       return this.moveY - (this.height / 2) + 'px'
     },
@@ -103,70 +92,103 @@ export default {
     }
   },
   created () {
-    this.list = [...this.value]
-    this.value.forEach((arr, i) => {
-      this.list[i] = [...arr]
-    })
+    this.list = this.boxIndex ? [...this.value[this.boxIndex]] : [...this.value]
   },
   methods: {
     //
-    mousedown (event, index, colIndex) {
-      if (this.pickColIndex !== -1 && this.pickIndex !== -1) {
+    mousedown (event, index, boxIndex) {
+      if (this.pickBoxIndex !== -1 && this.pickIndex !== -1) {
         return
       }
       this.timeout = setTimeout(() => {
-        this.pickUpDom = this.$refs[colIndex + '-' + index][0]
+        const pickUpDom = this.$refs[boxIndex + '-' + index][0]
         this.moveY = event.y
         this.moveX = event.x
         this.pickIndex = index
-        this.pickColIndex = colIndex
-        this.nowColIndex = colIndex
+        this.pickBoxIndex = boxIndex
+        this.nowBoxIndex = boxIndex
 
-        this.height = this.pickUpDom.clientHeight
-        this.width = this.pickUpDom.clientWidth
+        this.height = pickUpDom.clientHeight
+        this.width = pickUpDom.clientWidth
+        this.setPick(index, boxIndex, this.width, this.height)
       }, 100)
+      document.body.addEventListener('mouseup', this.mouseupG)
       document.body.addEventListener('mousemove', this.mousemove)
     },
-    mouseenter (index, colIndex) {
-      if (this.pickColIndex === -1 || this.pickIndex === -1) {
+    mouseenter (index, boxIndex) {
+      if (!DataMap.get(this.value)) {
         return
       }
-      if (colIndex === this.nowColIndex) {
+      if (boxIndex === this.nowBoxIndex) {
         this.nowIndex = index
       }
     },
-    mouseenterCol (colIndex) {
-      if (this.pickColIndex === -1 || this.pickIndex === -1) {
+    mouseenterBox () {
+      if (!DataMap.get(this.value)) {
         return
       }
-      this.nowColIndex = colIndex
-      this.nowIndex = this.list[colIndex].length
+      const { index, boxIndex, width, height } = DataMap.get(this.value)
+      this.width = width
+      this.height = height
+      this.pickIndex = index
+      this.pickBoxIndex = boxIndex
+      this.nowBoxIndex = this.boxIndex
+      this.nowIndex = this.value[boxIndex].length
+    },
+    mouseleaveBox () {
+      if (!DataMap.get(this.value)) {
+        return
+      }
+      this.nowBoxIndex = null
     },
     mouseup () {
       clearTimeout(this.timeout)
-      if (this.pickColIndex === -1 || this.pickIndex === -1) {
+      if (!DataMap.get(this.value)) {
         return
       }
-      const item = this.list[this.pickColIndex].splice(this.pickIndex, 1)
+      let updateValue = null
+      if (Object.prototype.toString.call(this.value) === '[object Array]') {
+        updateValue = [...this.value]
+      } else {
+        updateValue = { ...this.value }
+      }
+      const item = updateValue[this.pickBoxIndex].splice(this.pickIndex, 1)
       let nowIndex = this.nowIndex
-      if (nowIndex > this.pickIndex && this.pickColIndex === this.nowColIndex) {
+      if (nowIndex > this.pickIndex && this.pickBoxIndex === this.nowBoxIndex) {
         nowIndex--
       }
-      this.list[this.nowColIndex].splice(nowIndex, 0, item[0])
-      this.$emit('input', this.list)
-
+      updateValue[this.boxIndex].splice(nowIndex, 0, item[0])
+      this.$emit('input', updateValue)
+      this.deletePick()
       this.pickIndex = -1
-      this.pickColIndex = -1
-      this.nowColIndex = -1
+      this.pickBoxIndex = null
+      this.nowBoxIndex = null
       this.nowIndex = -1
-      this.pickUpDom = null
+    },
+    mouseupG () {
+      this.deletePick()
+      this.pickIndex = -1
+      this.pickBoxIndex = null
+      this.nowBoxIndex = null
+      this.nowIndex = -1
+      this.width = 0
+      this.height = 0
+      document.body.removeEventListener('mouseup', this.mouseupG)
       document.body.removeEventListener('mousemove', this.mousemove)
     },
     mousemove (event) {
-      if (this.pickColIndex !== -1 && this.pickIndex !== -1) {
+      if (this.pickBoxIndex !== -1 && this.pickIndex !== -1) {
         this.moveY = event.y
         this.moveX = event.x
       }
+    },
+    setPick (index, boxIndex, width, height) {
+      DataMap.set(this.value, {
+        index, boxIndex, width, height
+      })
+    },
+    deletePick () {
+      DataMap.delete(this.value)
     }
   }
 }
@@ -177,16 +199,13 @@ export default {
   display: flex;
   height: 100%;
   user-select: none;
-  .divider{
-    width: 1px;
-    margin: 5px 0;
-    background: #F5F7FA;
-  }
+  flex-direction: column;
 }
 .drag-block{
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-shrink: 0;
   &:hover{
     background: #F5F7FA;
   }
