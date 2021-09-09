@@ -55,10 +55,12 @@
           :propKey="propKey"
           :name="propKey"
         >
-          {{
-            pasteData[row.rowIndex] && pasteData[row.rowIndex][col.colIndex] !== undefined ?
-              pasteData[row.rowIndex][col.colIndex] : row.rawData[propKey]
-          }}
+          <div :style="{width:'100%',...col.style}">
+            {{
+              pasteData[row.rowIndex] && pasteData[row.rowIndex][col.colIndex] !== undefined ?
+                pasteData[row.rowIndex][col.colIndex] : row.rawData[propKey]
+            }}
+          </div>
         </slot>
       </TableCell>
     </div>
@@ -164,18 +166,25 @@ export default {
       this.picking = true
       this.$emit('update:focusBody', this._uid)
       // 生成对象，防止虚拟滚动删除节点
-      this.start = this.createTarget(event.target)
+      this.start = this.createTarget(this.findCell(event.target))
     },
     mousemove (event) {
       if (this.picking) {
-        this.pick(event.target)
+        this.pick(this.findCell(event.target))
       }
     },
     mouseup (event) {
-      this.end = this.createTarget(event.target)
+      this.end = this.createTarget(this.findCell(event.target))
       this.pick(this.end)
       this.picking = false
       this.$refs.copy && this.$refs.copy.select()
+    },
+    findCell (node) {
+      if (node.hasAttribute && node.hasAttribute('rowindex') && node.hasAttribute('colindex')) {
+        return node
+      } else {
+        return this.findCell(node.parentNode)
+      }
     },
     keydown (event) {
       // z
@@ -287,7 +296,7 @@ export default {
         this.transformX = Object.values(this.dataProp)[this.virtualBeginCol]?.transformX
       }
       this.$nextTick(() => {
-        this.computeHeight(force)
+        this.renderType === 1 && this.computeHeight(force)
         this.rendering = false
       })
     },
@@ -297,7 +306,7 @@ export default {
         // 渲染完成后计算高度
         const renderRowHeight = force ? [] : [...this.renderRowHeight]
         let change = false
-        this.renderType === 1 && this.renderDataList.forEach(row => {
+        this.renderDataList.forEach(row => {
           const clientHeight = this.$refs['row-' + row.rowIndex][0].clientHeight
           const height = renderRowHeight[row.rowIndex] || 0
           if (height < clientHeight) {

@@ -8,7 +8,8 @@
       :bind-val="bindVal"
       :show-checkbox="showCheckbox"
       :checked-arr="checkedArr"
-      :check="check"
+      :level="0"
+      @check="check"
     />
   </div>
 </template>
@@ -27,8 +28,7 @@ export default {
   data () {
     return {
       bindVal: '',
-      checkedArr: [],
-      checkedDep: []
+      checkedArr: []
     }
   },
   watch: {
@@ -56,6 +56,9 @@ export default {
       this.bindVal = value
     },
     check (value) {
+      if (!this.checked) {
+        return
+      }
       const index = this.checkedArr.findIndex(i => i === value)
       if (index === -1) {
         this.checkedArr.push(value)

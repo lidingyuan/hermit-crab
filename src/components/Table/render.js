@@ -4,25 +4,34 @@ export function renderHead (h) {
       <div class="crab-table-fixed">
         <TableHead
           headData={this.fixedHeadData}
+          sortTag={this.sortTag}
           {...{
             on: {
               sortData: this.sortData
             }
           }}
+          scopedSlots={ getHeadScopedSlots.call(this, this.fixedHeadData)}
         ></TableHead>
       </div>
-      {renderScrollBox.call(this, h, false, true, 'default-head', '', <TableHead
-        headData={this.defaultHeadData}
-        {...{
-          on: {
-            sortData: this.sortData
-          }
-        }}
-      ></TableHead>)}
+      {renderScrollBox.call(this, h, false, true, 'default-head', '',
+        <TableHead
+          headData={this.defaultHeadData}
+          sortTag={this.sortTag}
+          {...{
+            on: {
+              sortData: this.sortData
+            }
+          }}
+          scopedSlots={ getHeadScopedSlots.call(this, this.defaultHeadData)}
+        ></TableHead>
+      )}
     </div>
   )
 }
 export function renderStickyBody (h) {
+  if (!this.stickyDataList.length) {
+    return
+  }
   return (
     <div class="sticky-body">
       <div class="crab-table-fixed" style={{ width: this.fixedWidth + 'px' }}>
@@ -74,7 +83,7 @@ export function renderDefaultBody (h) {
     </div>
   )
 }
-export function renderScrollBox (h, top, left, clazz, style, slot) {
+function renderScrollBox (h, top, left, clazz, style, slot) {
   return (
     <ScrollBox
       class={clazz}
@@ -118,7 +127,7 @@ export function renderBody (h, prop) {
     </TableBody>
   )
 }
-export function getScopedSlots (keys) {
+function getScopedSlots (keys) {
   const scopedSlots = {}
   keys.forEach(key => {
     if (!this.$scopedSlots[key]) {
@@ -133,6 +142,18 @@ export function getScopedSlots (keys) {
       dataList: this.dataList,
       name: props.propKey
     })
+  })
+  return scopedSlots
+}
+function getHeadScopedSlots (list, scopedSlots = {}) {
+  list.forEach(column => {
+    if (column.children?.length) {
+      getHeadScopedSlots.call(this, column.children, scopedSlots)
+    }
+    if (!this.$scopedSlots[column.field + ':head']) {
+      return
+    }
+    scopedSlots[column.field] = this.$scopedSlots[column.field + ':head']
   })
   return scopedSlots
 }

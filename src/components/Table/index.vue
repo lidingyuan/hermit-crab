@@ -30,7 +30,7 @@ export default {
       type: Number,
       default: 60
     },
-    // renderType 1 不定高方向 2 定高方向还可优化（不渲染已有内容）
+    // renderType 1 不定高 2 定高 优化TODO
     renderType: {
       type: Number,
       default: 1
@@ -42,6 +42,15 @@ export default {
     orders: {
       type: Array,
       default: () => ['asc', 'desc', null]
+    },
+    border: {
+      type: Object,
+      default: () => {
+        return {
+          row: 'transparent',
+          col: 'transparent'
+        }
+      }
     }
   },
   data () {
@@ -56,6 +65,36 @@ export default {
       defaultHeadData: [],
       defaultRowsData: [],
       defaultBodyData: [],
+
+      // TODO 系列化
+      headSeries: [
+        // 固定列
+        {
+          width: 0,
+          type: 'static',
+          dataProp: {},
+          headData: []
+        },
+        // 滚动列
+        {
+          width: 0,
+          type: 'scroll',
+          dataProp: {},
+          headData: []
+        }
+      ],
+      bodySeries: [
+        // 固定行
+        {
+          type: 'static',
+          bodyData: []
+        },
+        // 滚动行
+        {
+          type: 'scroll',
+          bodyData: []
+        }
+      ],
 
       // tableProp
       fixedWidth: 0,
@@ -189,7 +228,7 @@ export default {
       handler (val) {
         if (val) {
           this.buildHead(val).forEach(head => {
-            if (head.fixed) {
+            if (head.fixed === 'left') {
               this.fixedHeadData.push(head)
             } else {
               this.defaultHeadData.push(head)
@@ -211,24 +250,23 @@ export default {
   methods: {
     buildHead (columnList, level = 1) {
       const columnData = []
-      let transformX = 0
       columnList.forEach(column => {
         let children = []
         let width = column.width || 200
-        let fixed = column.fixed || false
+        let fixed = column.fixed || 'default'
         let maxLevel = level
         let index = 0
         if (column.children && column.children.length) {
           children = this.buildHead(column.children, level + 1)
           width = 0
-          fixed = false
+          fixed = ''
           children.forEach(item => {
             width += item.width
             fixed = fixed || item.fixed
             maxLevel = Math.max(item.level, level)
           })
         } else {
-          if (fixed) {
+          if (fixed === 'left') {
             index = Object.keys(this.fixedDataProp).length
             this.fixedDataProp[column.field] = { field: column.field, width: width, transformX: this.fixedWidth, colIndex: index, style: column.style }
             this.fixedWidth += width
@@ -247,11 +285,8 @@ export default {
           level: level,
           maxLevel: maxLevel,
           rawData: column,
+          style: column.headStyle,
           children
-        }
-        if (this.virtualCol <= this.columnList.length) {
-          data.transformX = transformX
-          transformX += width
         }
         columnData.push(data)
       })
@@ -277,11 +312,36 @@ export default {
       if (scrollLeft !== undefined) {
         this.scrollLeft = scrollLeft
       }
+    },
+    borderStyle (border) {
+      let row = border.row || 'transparent'
+      let col = border.col || 'transparent'
+      row = [row].flat()
+      col = [col].flat()
+      if (row.length === 1) {
+        row = row.concat(row)
+      }
+      if (col.length === 1) {
+        col = col.concat(col)
+      }
+      row = row.reduce((a, b) => a + ',' + b, '').substr(1)
+      col = col.reduce((a, b) => a + ',' + b, '').substr(1)
+      return {
+        padding: '1px',
+        background: `linear-gradient(${row}) no-repeat,linear-gradient(${col}) no-repeat,linear-gradient(${row}) no-repeat,linear-gradient(${col}) no-repeat`,
+        'background-size': '100% 1px,1px 100%,100% 1px,1px 100%',
+        'background-position': '0 0,0 0,0 100%,100% 0'
+      }
     }
   },
   render (h) {
+    const style = this.borderStyle(this.border)
     return (
-      <div ref="table" class="crab-table">
+      <div
+        ref="table"
+        class="crab-table"
+        style={style}
+      >
         {renderFun.renderHead.call(this, h)}
         {renderFun.renderStickyBody.call(this, h)}
         {renderFun.renderDefaultBody.call(this, h)}

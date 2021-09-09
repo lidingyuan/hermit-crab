@@ -13,6 +13,8 @@
 <style lang='scss' scoped>
 .table-cell{
   flex-shrink: 0;
+  box-sizing: border-box;
+  padding: 0 0.5em;
   display: flex;
   justify-content: center;
   align-items: center;

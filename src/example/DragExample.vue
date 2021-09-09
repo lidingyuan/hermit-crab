@@ -1,6 +1,7 @@
 <template>
   <div class="drag-example">
-    拖拽例子，不使用draggable 可在拖拽时滚动。准备拆分，多个位置不定容器互相拖拽
+    拖拽例子，不使用draggable 可在拖拽时滚动。
+    下一步：增加横向列表
     <ScrollBox style="width:100%;height:200px;border:1px solid #000;border-box;">
       <DragBoxPlural
         v-model="options"

@@ -1,5 +1,6 @@
 <template>
   <div class="table-example">
+    <WaterMark />
     表格例子，支持多级表头，固定行固定列，虚拟滚动，复制粘贴(excel)，排序等
     预计添加：
     1.动态配置表格结构
@@ -8,7 +9,14 @@
       :virtual-col="9"
       :column-list="columnList"
       :data-list="dataList"
-    />
+    >
+      <template #test4:head="head">
+        {{ head.name }}
+      </template>
+      <template #test5:head>
+        321
+      </template>
+    </CrabTable>
     <CrabTable
       style="width:100%;height:80vh;overflow: hidden;"
       :virtual-col="9"
@@ -35,9 +43,10 @@
 <script>
 import CrabTable from '../components/Table'
 import Button from '../components/Button'
+import WaterMark from '@/components/WaterMark'
 export default {
   name: 'TableExample',
-  components: { CrabTable, Button },
+  components: { CrabTable, Button, WaterMark },
   data () {
     return {
       columnList: [
@@ -46,7 +55,7 @@ export default {
           name: '测试1',
           children: [
             { field: 'test1', name: '测试2' },
-            { field: 'test2', name: '测试3', style: { 'text-align': 'center' } }
+            { field: 'test2', name: '测试3', style: { 'text-align': 'right' }, headStyle: { 'text-align': 'right' } }
           ]
         },
         {
@@ -57,7 +66,7 @@ export default {
               field: 'test3',
               name: '测试5',
               children: [
-                { field: 'test4', name: '测试6', fixed: true }
+                { field: 'test5', name: '测试6', fixed: 'left' }
               ]
             }
           ]
@@ -86,8 +95,8 @@ export default {
       ],
       dataList: [
         { test1: 1, test2: 'asdasdafwafa', test3: 3, test4: 4, test5: 5, test6: 6, test7: 7, test8: 8, test9: 9 },
-        { test1: 1, test2: '2', test3: 3, test4: 4, test5: 5, test6: 6, test7: 7, test8: 8, test9: 9 },
-        { test1: 1, test2: '2', test3: 3, test4: 4, test5: 5, test6: 6, test7: 7, test8: 8, test9: 9 },
+        { test1: 1, test2: 'b', test3: 3, test4: 4, test5: 5, test6: 6, test7: 7, test8: 8, test9: 9 },
+        { test1: 1, test2: 'c', test3: 3, test4: 4, test5: 5, test6: 6, test7: 7, test8: 8, test9: 9 },
         { test1: 1, test2: '2', test3: 3, test4: 4, test5: 5, test6: 6, test7: 7, test8: 8, test9: 9 },
         { test1: 1, test2: '2', test3: 3, test4: 4, test5: 5, test6: 6, test7: 7, test8: 8, test9: 9 },
         { test1: 1, test2: '2', test3: 3, test4: 4, test5: 5, test6: 6, test7: 7, test8: 8, test9: 9 },

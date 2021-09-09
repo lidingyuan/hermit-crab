@@ -5,11 +5,6 @@
       :active-menu.sync="show"
     />
     <div class="content">
-      <WaterMark
-        :text="show"
-        :opacity="0.3"
-        :color="['green','blue']"
-      />
       <DragExample v-if="show === 'DragExample'" />
       <TableExample v-if="show === 'TableExample'" />
       <QueryExample v-if="show === 'QueryExample'" />
@@ -22,10 +17,9 @@ import DragExample from './example/DragExample'
 import TableExample from './example/TableExample'
 import QueryExample from './example/QueryExample'
 import LayoutSiderbar from './components/LayoutSiderbar'
-import WaterMark from './components/WaterMark'
 export default {
   name: 'App',
-  components: { DragExample, TableExample, QueryExample, LayoutSiderbar, WaterMark },
+  components: { DragExample, TableExample, QueryExample, LayoutSiderbar },
   data () {
     return {
       show: 'TableExample',

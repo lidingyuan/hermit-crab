@@ -48,7 +48,7 @@ export default {
       const cos = Math.cos(this.deg * Math.PI / 180)
       ctx.translate(cos < 0 ? canvas.width - (this.fontSize / 4) : this.fontSize / 2, sin < 0 ? canvas.height - (this.fontSize / 4) : this.fontSize / 2)
       ctx.rotate(this.deg * Math.PI / 180)
-      if (this.color.length) {
+      if (Object.prototype.toString.call(this.color) === '[object Array]') {
         const gr = ctx.createLinearGradient(0, 0, canvas.width, 0)
         this.color.forEach((color, index) => {
           gr.addColorStop(index / this.color.length, color)

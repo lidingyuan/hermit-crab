@@ -1,14 +1,3 @@
-<template>
-  <div class="table-head">
-    <TableHeadCell
-      v-for="head in headData"
-      :key="head.field"
-      :style="{width:head.width+'px'}"
-      :head="head"
-      @sortData="sortData"
-    />
-  </div>
-</template>
 
 <script>
 import TableHeadCell from './TableHeadCell'
@@ -16,19 +5,39 @@ export default {
   name: 'TableHead',
   components: { TableHeadCell },
   props: {
-    headData: Array
-  },
-  data () {
-    return {
-
-    }
-  },
-  created () {
+    headData: Array,
+    sortTag: Object
   },
   methods: {
     sortData (head) {
       this.$emit('sortData', head)
+    },
+    renderCell () {
+      return this.headData.map(head => {
+        return (
+          <TableHeadCell
+            key={head.field}
+            style={{ width: head.width + 'px' }}
+            head={head}
+            sortTag={this.sortTag}
+            {...{
+              on: {
+                sortData: this.sortData
+              }
+            }}
+            scopedSlots={this.$scopedSlots}
+          >
+          </TableHeadCell>
+        )
+      })
     }
+  },
+  render () {
+    return (
+      <div class="table-head">
+        {this.renderCell()}
+      </div>
+    )
   }
 }
 </script>
