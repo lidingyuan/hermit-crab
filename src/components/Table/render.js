@@ -116,10 +116,14 @@ export function renderBody (h, prop) {
       focusBody={this.focusBody}
       renderRowHeight={prop.renderRowHeight}
       excelMode={this.excelMode}
+      hoverRow={this.hoverRow}
+      selectRow={this.selectRow}
       {...{
         on: {
           'update:focusBody': (focusBody) => { this.focusBody = focusBody },
-          'update:renderRowHeight': (renderRowHeight) => { this.renderRowHeight[prop.renderRowKey] = renderRowHeight }
+          'update:renderRowHeight': (renderRowHeight) => { this.renderRowHeight[prop.renderRowKey] = renderRowHeight },
+          'update:hoverRow': (hoverRow) => { this.hoverRow = hoverRow },
+          'update:selectRow': (selectRow) => { this.selectRow = selectRow }
         }
       }}
       scopedSlots={ getScopedSlots.call(this, Object.keys(prop.dataProp))}
@@ -133,15 +137,12 @@ function getScopedSlots (keys) {
     if (!this.$scopedSlots[key]) {
       return
     }
-    scopedSlots[key] = props => this.$scopedSlots[key]({
-      rowIndex: props.rowIndex,
-      colIndex: props.colIndex,
-      row: props.row,
-      propKey: props.propKey,
-      dataProp: this.dataProp,
-      dataList: this.dataList,
-      name: props.propKey
-    })
+    scopedSlots[key] = props => this.$scopedSlots[key](props)
+  })
+  Object.keys(this.$scopedSlots).forEach(key => {
+    if (key.substr(0, 3) === 'row') {
+      scopedSlots[key] = props => this.$scopedSlots[key](props)
+    }
   })
   return scopedSlots
 }

@@ -29,7 +29,8 @@ export default {
 .table-pick-cell{
   position: absolute;
   pointer-events: none;
-  background: rgba($color: #ff0, $alpha: 0.5);
+  background: rgba($color: #ff0, $alpha: 0.3);
   border: 1px solid #ff0;
+  z-index:1;
 }
 </style>

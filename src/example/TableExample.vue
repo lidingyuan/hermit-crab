@@ -10,8 +10,8 @@
       :column-list="columnList"
       :data-list="dataList"
     >
-      <template #test4:head="head">
-        {{ head.name }}
+      <template #test4:head>
+        333
       </template>
       <template #test5:head>
         321
@@ -24,6 +24,9 @@
       :data-list="dataList"
       :sticky-rows="3"
     >
+      <template #row:0>
+        这行我说了算
+      </template>
       <template #test4="{rowIndex}">
         {{ rowIndex }}
       </template>
@@ -55,7 +58,7 @@ export default {
           name: '测试1',
           children: [
             { field: 'test1', name: '测试2' },
-            { field: 'test2', name: '测试3', style: { 'text-align': 'right' }, headStyle: { 'text-align': 'right' } }
+            { field: 'test2', name: '测试3', align: 'right', headAlign: 'right' }
           ]
         },
         {

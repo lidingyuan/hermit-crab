@@ -41,9 +41,7 @@ export default {
           this.$scopedSlots[this.head.field](this.head)
         )
       } else {
-        return (
-          <div style={{ width: '100%', ...this.head.style }}>{this.head.name}</div>
-        )
+        return this.head.name
       }
     },
     renderSlotTitleSort () {
@@ -53,10 +51,19 @@ export default {
     }
   },
   render () {
+    const style = { 'flex-grow': 1 }
+    const alignMap = {
+      left: ['flex-start', 'left'],
+      right: ['flex-end', 'right'],
+      center: ['center', 'center'],
+      undefined: ['center', 'center']
+    }
+    style['justify-content'] = alignMap[this.head.align][0]
+    style['text-align'] = alignMap[this.head.align][1]
     return (
       <div class="table-head-cell">
         <TableCell
-          style={{ 'flex-grow': 1 }}
+          style={style}
           {...{
             on: {
               click: () => { this.$emit('sortData', this.head) }
@@ -84,5 +91,8 @@ export default {
 .table-head-row{
   display: flex;
   flex-grow: 1;
+  background:linear-gradient(#ccc,#ccc) no-repeat;
+  background-size:100% 1px;
+  background-position:0 100%;
 }
 </style>

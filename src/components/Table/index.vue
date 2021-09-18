@@ -123,25 +123,30 @@ export default {
         desc: (num) => {
           return num * -1
         }
-      }
+      },
+      hoverRow: -1,
+      selectRow: -1
     }
   },
   computed: {
     stickyDataList () {
-      return this.dataList.slice(0, this.stickyRows).map((item, index) => {
+      return this.dataList.map((item, index) => {
         const row = {
           rowIndex: index,
-          maxHeight: 0,
           rawData: item
+        }
+        return row
+      }).slice(0, this.stickyRows).map((item, index) => {
+        const row = {
+          // rowIndex: index,
+          ...item
         }
         return row
       })
     },
     defaultDataList () {
-      const dataList = this.dataList.slice(this.stickyRows)
-      if (!this.sortTag.key || this.orders[this.sortTag.type] === null) {
-        // return dataList
-      } else {
+      const dataList = [...this.dataList]
+      if (this.sortTag.key && this.orders[this.sortTag.type] !== null) {
         const type = this.orders[this.sortTag.type]
         dataList.sort((a, b) => {
           if (a[this.sortTag.key] > b[this.sortTag.key]) {
@@ -156,8 +161,16 @@ export default {
       return dataList.map((item, index) => {
         const row = {
           rowIndex: index,
-          maxHeight: 0,
           rawData: item
+        }
+        if (this.virtualRow <= this.dataList.length) {
+          row.transformY = index * this.baseRowHeight
+        }
+        return row
+      }).slice(this.stickyRows).map((item, index) => {
+        const row = {
+          // rowIndex: index,
+          ...item
         }
         if (this.virtualRow <= this.dataList.length) {
           row.transformY = index * this.baseRowHeight
@@ -268,11 +281,11 @@ export default {
         } else {
           if (fixed === 'left') {
             index = Object.keys(this.fixedDataProp).length
-            this.fixedDataProp[column.field] = { field: column.field, width: width, transformX: this.fixedWidth, colIndex: index, style: column.style }
+            this.fixedDataProp[column.field] = { field: column.field, width: width, transformX: this.fixedWidth, colIndex: index, align: column.align }
             this.fixedWidth += width
           } else {
             index = Object.keys(this.dataProp).length
-            this.dataProp[column.field] = { field: column.field, width: width, transformX: this.defaultWidth, colIndex: index, style: column.style }
+            this.dataProp[column.field] = { field: column.field, width: width, transformX: this.defaultWidth, colIndex: index, align: column.align }
             this.defaultWidth += width
           }
         }
@@ -285,7 +298,7 @@ export default {
           level: level,
           maxLevel: maxLevel,
           rawData: column,
-          style: column.headStyle,
+          align: column.headAlign,
           children
         }
         columnData.push(data)
