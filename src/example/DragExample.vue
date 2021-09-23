@@ -5,7 +5,7 @@
     <ScrollBox style="width:100%;height:200px;border:1px solid #000;border-box;">
       <DragBoxPlural
         v-model="options"
-        boxIndex="a"
+        box-index="a"
         style="width:100%;height:200px;text-align:center;"
       >
         <template v-slot:default="{item}">
@@ -18,7 +18,7 @@
     <ScrollBox style="width:100%;height:200px;border:1px solid #000;border-box;margin-top:10vh;">
       <DragBoxPlural
         v-model="options"
-        boxIndex="b"
+        box-index="b"
         style="width:100%;height:200px;text-align:center;"
       >
         <template v-slot:default="{item}">
@@ -36,6 +36,7 @@ import DragBoxPlural from '../components/DragBoxPlural'
 import ScrollBox from '../components/ScrollBox'
 export default {
   name: 'DragExample',
+  label: '拖拽',
   components: { DragBoxPlural, ScrollBox },
   data () {
     return {

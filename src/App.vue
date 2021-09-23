@@ -5,29 +5,31 @@
       :active-menu.sync="show"
     />
     <div class="content">
-      <DragExample v-if="show === 'DragExample'" />
-      <TableExample v-if="show === 'TableExample'" />
-      <QueryExample v-if="show === 'QueryExample'" />
+      <component :is="show" />
     </div>
   </div>
 </template>
 
 <script>
-import DragExample from './example/DragExample'
-import TableExample from './example/TableExample'
-import QueryExample from './example/QueryExample'
 import LayoutSiderbar from './components/LayoutSiderbar'
+const files = require.context('@/example', true, /^((?!components).)+\.vue$/, 'sync')
+const components = {}
+files.keys().forEach(key => {
+  const component = files(key).default || files(key)
+  components[component.name] = component
+})
 export default {
   name: 'App',
-  components: { DragExample, TableExample, QueryExample, LayoutSiderbar },
+  components: { LayoutSiderbar, ...components },
   data () {
     return {
       show: 'TableExample',
-      menuList: [
-        { name: '拖拽', key: 'DragExample' },
-        { name: '表格', key: 'TableExample' },
-        { name: '查询条件', key: 'QueryExample' }
-      ]
+      menuList: Object.values(components).map(comp => {
+        return {
+          name: comp.label,
+          key: comp.name
+        }
+      })
     }
   }
 }

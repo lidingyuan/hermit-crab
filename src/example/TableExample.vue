@@ -49,6 +49,7 @@ import Button from '../components/Button'
 import WaterMark from '@/components/WaterMark'
 export default {
   name: 'TableExample',
+  label: '表格',
   components: { CrabTable, Button, WaterMark },
   data () {
     return {

@@ -11,7 +11,7 @@ export default {
   props: {
     text: {
       type: String,
-      default: '州力'
+      default: 'crab'
     },
     fontSize: {
       type: Number,
