@@ -87,7 +87,6 @@ function renderScrollBox (h, top, left, clazz, style, slot) {
   return (
     <ScrollBox
       class={clazz}
-      type="flex"
       style={style}
       scrollLeft={left ? this.scrollLeft : 0}
       scrollTop={top ? this.scrollTop : 0}

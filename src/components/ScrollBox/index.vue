@@ -2,12 +2,11 @@
   <div
     ref="scroll-box"
     class="scroll-box"
-    :style="boxStyle"
   >
     <div
       ref="scroll-view"
       class="scroll-view"
-      :style="{height:`calc(100% + ${hideYWidth}px)`,width:`calc(100% + ${hideXWidth}px)`}"
+      :style="viewStyle"
       @mouseenter="hover(true)"
       @mouseleave="hover(false)"
       @scroll="scroll"
@@ -42,8 +41,7 @@ export default {
       default: 'rgba(0,0,0,0.3)'
     },
     scrollTop: Number,
-    scrollLeft: Number,
-    type: String
+    scrollLeft: Number
   },
   data () {
     return {
@@ -57,10 +55,12 @@ export default {
       coefficientY: 0,
       barYTop: 0,
       barXLeft: 0,
-      // 隐藏的宽高 用于隐藏默认滚动条
-      hideYWidth: 0,
-      hideXWidth: 0,
-      overflow: 'scroll',
+      boxStyle: {},
+      viewStyle: {
+        height: '100%',
+        width: '100%'
+      },
+
       listener: null,
       clickBegin: {
         X: 0,
@@ -70,16 +70,9 @@ export default {
         X: 0,
         Y: 0
       },
-      clickBarName: ''
-    }
-  },
-  computed: {
-    boxStyle () {
-      const boxStyle = { overflow: this.overflow }
-      if (this.type === 'flex') {
-        boxStyle.margin = `0 0 -${this.hideYWidth}px 0`
-      }
-      return boxStyle
+      clickBarName: '',
+
+      defaultHeight: undefined
     }
   },
   watch: {
@@ -91,17 +84,14 @@ export default {
     }
   },
   mounted () {
-    const that = this
-    this.listener = () => {
-      that.computeBarWidth()
-    }
-    window.addEventListener('resize', this.listener)
+    this.defaultHeight = this.$refs['scroll-view'].clientHeight
+    window.addEventListener('resize', this.computeBarWidth)
     this.computeBarWidth()
   },
   beforeDestroy () {
     document.removeEventListener('mousemove', this.moveScroll)
     document.removeEventListener('mouseup', this.endScroll)
-    window.removeEventListener('resize', this.listener)
+    window.removeEventListener('resize', this.computeBarWidth)
   },
   methods: {
     //
@@ -111,10 +101,10 @@ export default {
       this.coefficientX = el.clientWidth / el.scrollWidth
       this.showBar.Y = false
       this.showBar.X = false
-      if (this.coefficientY < 1 && this.hideYWidth !== 0) {
+      if (this.coefficientY < 1) {
         this.showBar.Y = b
       }
-      if (this.coefficientX < 1 && this.hideXWidth !== 0) {
+      if (this.coefficientX < 1) {
         this.showBar.X = b
       }
     },
@@ -127,18 +117,23 @@ export default {
       this.$emit('scrollChange', el.scrollTop, el.scrollLeft)
     },
     computeBarWidth () {
-      this.overflow = 'scroll'
-      this.hideYWidth = 0
-      this.hideXWidth = 0
+      this.viewStyle = {
+        height: '100%',
+        width: '100%'
+      }
       this.$nextTick(() => {
-        this.hideYWidth = parseFloat(window.getComputedStyle(this.$refs['scroll-box']).height) - parseFloat(window.getComputedStyle(this.$refs['scroll-view']).height)
-        this.hideXWidth = parseFloat(window.getComputedStyle(this.$refs['scroll-box']).width) - parseFloat(window.getComputedStyle(this.$refs['scroll-view']).width)
-        this.overflow = 'hidden'
-        this.$nextTick(() => {
-          const el = this.$refs['scroll-view']
-          this.coefficientY = el.clientHeight / el.scrollHeight
-          this.coefficientX = el.clientWidth / el.scrollWidth
-        })
+        const clientWidth = this.$refs['scroll-view'].clientWidth
+        const offsetWidth = this.$refs['scroll-view'].offsetWidth
+        const clientHeight = this.$refs['scroll-view'].clientHeight
+        const offsetHeight = this.$refs['scroll-view'].offsetHeight
+
+        this.viewStyle = {
+          height: `calc(100% + ${offsetWidth - clientWidth}px)`,
+          width: `calc(100% + ${offsetHeight - clientHeight}px)`
+        }
+        if (!this.defaultHeight) {
+          this.viewStyle['margin-bottom'] = `-${offsetHeight - clientHeight}px`
+        }
       })
     },
     beginScroll (event, d) {
@@ -170,6 +165,7 @@ export default {
   position: relative;
   height: 100%;
   width: 100%;
+  overflow: hidden;
 }
 .bar-y{
   cursor: pointer;
