@@ -76,10 +76,16 @@ export default {
     }
   },
   watch: {
-    scrollTop (val) {
+    scrollTop (val, oldVal) {
+      if (val === oldVal) {
+        return
+      }
       this.$refs['scroll-view'].scrollTop = val
     },
-    scrollLeft (val) {
+    scrollLeft (val, oldVal) {
+      if (val === oldVal) {
+        return
+      }
       this.$refs['scroll-view'].scrollLeft = val
     }
   },
@@ -109,12 +115,15 @@ export default {
       }
     },
     scroll () {
-      const el = this.$refs['scroll-view']
-      if (el) {
-        this.barYTop = el.scrollTop / el.clientHeight * 100 + '%'
-        this.barXLeft = el.scrollLeft / el.clientWidth * 100 + '%'
+      const clientHeight = this.$refs['scroll-view'].clientHeight
+      const clientWidth = this.$refs['scroll-view'].clientWidth
+      const scrollTop = this.$refs['scroll-view'].scrollTop
+      const scrollLeft = this.$refs['scroll-view'].scrollLeft
+      this.barYTop = scrollTop / clientHeight * 100 + '%'
+      this.barXLeft = scrollLeft / clientWidth * 100 + '%'
+      if (this.scrollTop !== scrollTop || this.scrollLeft !== scrollLeft) {
+        this.$emit('scrollChange', scrollTop, scrollLeft)
       }
-      this.$emit('scrollChange', el.scrollTop, el.scrollLeft)
     },
     computeBarWidth () {
       this.viewStyle = {
