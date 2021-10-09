@@ -10,19 +10,17 @@
         <i
           v-if="option.children && option.children.length"
           v-transition:icon-rotate="show"
-          class="fa fa-caret-right"
-          aria-hidden="true"
+          class="caret"
         />
       </span>
       <span
         class="tree-label"
         @click.stop="select(option.value);change()"
       >
-        <i
+        <ZlCheckIcon
           v-if="showCheckbox"
-          :class="[checkedNumber === collectList.length?'fa-check-square':checkedNumber === 0?'fa-square-o':'fa-minus-square']"
-          class="fa tree-icon"
-          aria-hidden="true"
+          :check="checkedNumber != 0"
+          :type="(checkedNumber === collectList.length || checkedNumber === 0)?'square':'square half'"
         />
         {{ option.label }}
       </span>
@@ -117,26 +115,47 @@ export default {
     display: flex;
     align-items: center;
     .tree-icon{
-      width: 16px;
-      height: 16px;
+      width: 1em;
+      height: 1em;
+      margin-right: 0.5em;
+      display: inline-flex;
+    }
+    .caret{
+      width: 1em;
+      height: 1em;
       display: inline-flex;
       justify-content: center;
       align-items: center;
-      &.fa-check-square{
-        color: $base-color;
-      }
-      &.fa-minus-square{
-        color: $base-color;
+      position: relative;
+      &::after{
+        transition: all 0.3s;
+        border-right: 0.2em solid #333;
+        border-bottom: 0.2em solid #333;
+        border-top: 0.2em solid transparent;
+        border-left: 0.2em solid transparent;
+        position: absolute;
+        content: '';
+        width: 0em;
+        height: 0em;
+        margin-top: 0em;
+        margin-left: 0em;
+        transform: rotate(-45deg);
       }
     }
     .icon-rotate{
-      transform: rotateZ(90deg);
+      &::after{
+        margin-top: -0.2em;
+        margin-left: 0.2em;
+        transform: rotate(45deg);
+      }
     }
     &.select{
-      background: #ccc;
+      background: #ddd;
     }
     .tree-label{
       flex-grow: 1;
+      display: flex;
+      align-items: center;
     }
   }
 }
