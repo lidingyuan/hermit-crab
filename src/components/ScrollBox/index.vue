@@ -14,13 +14,13 @@
       <slot />
       <div
         class="bar-y"
-        :style="{height:coefficientY * 100 + '%',backgroundColor: showBar.Y ? backgroundColor : '',transform: 'translate3d(0, '+barYTop+', 0)'}"
-        @mousedown="beginScroll($event,'Y')"
+        :style="{height:coefficientY * 100 + '%',backgroundColor: showBar.Y ? backgroundColor : '',transform: 'translate3d(0, '+barYTop+', 0)',cursor: showBar.Y ?'pointer':''}"
+        @mousedown="showBar.Y && beginScroll($event,'Y')"
       />
       <div
         class="bar-x"
-        :style="{width:coefficientX * 100 + '%',backgroundColor: showBar.X ? backgroundColor : '',transform: 'translate3d('+barXLeft+', 0, 0)'}"
-        @mousedown="beginScroll($event,'X')"
+        :style="{width:coefficientX * 100 + '%',backgroundColor: showBar.X ? backgroundColor : '',transform: 'translate3d('+barXLeft+', 0, 0)',cursor: showBar.X ?'pointer':''}"
+        @mousedown="showBar.X && beginScroll($event,'X')"
       />
     </div>
   </div>
@@ -31,6 +31,14 @@ const scrollNameMap = {
   Y: 'scrollTop',
   X: 'scrollLeft'
 }
+
+const listenerList = []
+function resize () {
+  listenerList.forEach(fun => {
+    fun()
+  })
+}
+window.addEventListener('resize', resize)
 
 export default {
   name: 'ScrollBox',
@@ -91,13 +99,14 @@ export default {
   },
   mounted () {
     this.defaultHeight = this.$refs['scroll-view'].clientHeight
-    window.addEventListener('resize', this.computeBarWidth)
+    listenerList.push(this.computeBarWidth)
     this.computeBarWidth()
   },
   beforeDestroy () {
     document.removeEventListener('mousemove', this.moveScroll)
     document.removeEventListener('mouseup', this.endScroll)
-    window.removeEventListener('resize', this.computeBarWidth)
+    const index = listenerList.findIndex(fun => fun === this.computeBarWidth)
+    index > -1 && listenerList.splice(index, 1)
   },
   methods: {
     //
@@ -177,7 +186,6 @@ export default {
   overflow: hidden;
 }
 .bar-y{
-  cursor: pointer;
   position: absolute;
   z-index: 1;
   width: 5px;
@@ -188,7 +196,6 @@ export default {
   user-select: none;
 }
 .bar-x{
-  cursor: pointer;
   position: absolute;
   z-index: 1;
   height: 5px;

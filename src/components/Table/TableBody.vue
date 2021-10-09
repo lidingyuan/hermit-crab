@@ -509,9 +509,9 @@ export default {
 <style lang='scss' scoped>
 .table-body-row{
   display: flex;
-  background:linear-gradient(#ccc,#ccc) no-repeat;
-  background-size:100% 1px;
-  background-position:0 100%;
+  background:linear-gradient(#ccc,#ccc) no-repeat,linear-gradient(#ccc,#ccc) no-repeat;
+  background-size:100% 1px,1px 100%;
+  background-position:0 100%,100% 0;
   &.row-hover{
     background-color: #eee;
   }
