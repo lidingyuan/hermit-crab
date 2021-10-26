@@ -130,19 +130,14 @@ export default {
   },
   computed: {
     stickyDataList () {
-      return this.dataList.map((item, index) => {
-        const row = {
-          rowIndex: index,
-          rawData: item
-        }
-        return row
-      }).slice(0, this.stickyRows).map((item, index) => {
-        const row = {
-          // rowIndex: index,
-          ...item
-        }
-        return row
-      })
+      return this.dataList
+        .slice(0, this.stickyRows)
+        .map((item, index) => {
+          return {
+            rowIndex: index,
+            rawData: item
+          }
+        })
     },
     defaultDataList () {
       const dataList = [...this.dataList]
@@ -158,25 +153,16 @@ export default {
           return 0
         })
       }
-      return dataList.map((item, index) => {
-        const row = {
-          rowIndex: index,
-          rawData: item
-        }
-        if (this.virtualRow <= this.dataList.length) {
-          row.transformY = index * this.baseRowHeight
-        }
-        return row
-      }).slice(this.stickyRows).map((item, index) => {
-        const row = {
-          // rowIndex: index,
-          ...item
-        }
-        if (this.virtualRow <= this.dataList.length) {
-          row.transformY = index * this.baseRowHeight
-        }
-        return row
-      })
+      const list = dataList
+        .slice(this.stickyRows)
+        .map((item, index) => {
+          return {
+            rowIndex: index,
+            rawData: item,
+            transformY: index * this.baseRowHeight
+          }
+        })
+      return list
     },
     virtualBeginRow () {
       if (this.virtualRow > this.defaultDataList.length) {
@@ -240,6 +226,11 @@ export default {
     columnList: {
       handler (val) {
         if (val) {
+          this.fixedHeadData = []
+          this.defaultHeadData = []
+
+          this.fixedWidth = 0
+          this.defaultWidth = 0
           this.buildHead(val).forEach(head => {
             if (head.fixed === 'left') {
               this.fixedHeadData.push(head)

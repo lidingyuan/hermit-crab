@@ -14,7 +14,7 @@
         :ref="boxIndex+'-'+itemIndex"
         :style="{
           'margin-top':nowBoxIndex===boxIndex && nowIndex===itemIndex?height+'px':'0',
-          transition: pickIndex>-1 && !!pickBoxIndex && (pickIndex!==itemIndex || pickBoxIndex!==boxIndex)?'all 0.5s':'none',
+          transition: pickIndex>-1 && !!pickBoxIndex && (pickIndex!==itemIndex || pickBoxIndex!==boxIndex)?'all 0.5s linear':'none',
           top:pickIndex===itemIndex && pickBoxIndex===boxIndex?top:0,
           left:pickIndex===itemIndex && pickBoxIndex===boxIndex?left:0,
           width:pickIndex===itemIndex && pickBoxIndex===boxIndex?width+'px' : '',
@@ -32,10 +32,13 @@
           {{ item }}
         </slot>
       </div>
-      <div class="drag-block" :ref="boxIndex+'-'+arr.length" :style="{height:height+'px',width:width+'px'}"
+      <div
+        :ref="boxIndex+'-'+arr.length"
+        class="drag-block"
+        :style="{height:height+'px',width:width+'px'}"
         @mousedown="mousedown($event,arr.length,boxIndex)"
         @mouseenter="mouseenter(arr.length,boxIndex)"
-      ></div>
+      />
     </div>
   </div>
 </template>
@@ -75,11 +78,6 @@ export default {
       width: null
     }
   },
-  watch: {
-    value () {
-      this.list = this.boxIndex ? [...this.value[this.boxIndex]] : [...this.value]
-    }
-  },
   computed: {
     arr () {
       return this.boxIndex ? this.value[this.boxIndex] : this.value
@@ -89,6 +87,11 @@ export default {
     },
     left () {
       return this.moveX - (this.width / 2) + 'px'
+    }
+  },
+  watch: {
+    value () {
+      this.list = this.boxIndex ? [...this.value[this.boxIndex]] : [...this.value]
     }
   },
   created () {

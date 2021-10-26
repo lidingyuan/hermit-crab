@@ -28,7 +28,7 @@ export default {
   transition: all 0.3s;
   border: 1px solid #ccc;
   &::after{
-    transition: all 0.3s;
+    transition: all 0.1s;
     border: 1em solid transparent;
     width: 1em;
     height: 1em;

@@ -114,7 +114,7 @@ export default {
     }
   },
   created () {
-    this.dataList = new Array(1000).fill(
+    this.dataList = new Array(1000000).fill(
       { test1: 1, test2: 'asdasdafwafa', test3: 3, test4: 4, test5: 5, test6: 6, test7: 7, test8: 8, test9: 9 }
     )
   },
