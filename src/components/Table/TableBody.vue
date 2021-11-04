@@ -56,6 +56,8 @@ export default {
   watch: {
     virtualBeginRow () { this.renderByScroll() },
     virtualBeginCol () { this.renderByScroll() },
+    virtualRowSize () { this.renderByScroll() },
+    virtualColSize () { this.renderByScroll() },
     dataList () { this.getRenderDataList('force') },
     renderRowHeight () {
       if (this.focusBody !== this._uid) {

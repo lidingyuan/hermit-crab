@@ -55,6 +55,7 @@ export default {
   },
   data () {
     return {
+      observer: null,
       scrollTop: 0,
       scrollLeft: 0,
 
@@ -231,6 +232,9 @@ export default {
 
           this.fixedWidth = 0
           this.defaultWidth = 0
+
+          this.dataProp = {}
+          this.fixedDataProp = {}
           this.buildHead(val).forEach(head => {
             if (head.fixed === 'left') {
               this.fixedHeadData.push(head)
@@ -247,8 +251,15 @@ export default {
     this.getViewSize()
     this.baseRowHeight = parseInt(window.getComputedStyle(this.$refs.main).lineHeight)
     window.addEventListener('resize', this.getViewSize, false)
+    // 创建一个观察器实例并传入回调函数
+    this.observer = new MutationObserver(this.getViewSize)
+    const config = {
+      attributes: true
+    }
+    this.observer.observe(this.$el, config)
   },
   beforeDestroy () {
+    this.observer.disconnect()
     window.removeEventListener('resize', this.getViewSize)
   },
   methods: {
@@ -297,8 +308,8 @@ export default {
       return columnData
     },
     getViewSize () {
-      this.viewHeight = this.$refs.table.clientHeight
-      this.viewWidth = this.$refs.table.clientWidth
+      this.viewHeight = this.$refs.table.clientHeight || this.viewHeight
+      this.viewWidth = this.$refs.table.clientWidth || this.viewWidth
     },
     // 排序
     sortData (head) {

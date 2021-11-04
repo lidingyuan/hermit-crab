@@ -42,7 +42,7 @@ function addEventListener (el) {
       return
     }
     e.stopPropagation()
-    if (el.offsetHeight) {
+    if (el.style.height !== '0px') {
       el.style.height = ''
     } else {
       el.style.display = 'none'

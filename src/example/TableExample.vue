@@ -92,14 +92,9 @@ export default {
           field: 'test7',
           name: '测试7',
           children: [
-            { field: 'test8', name: '测试8' },
-            { field: 'test9', name: '测试9' },
-            { field: 'test10', name: '测试10' },
-            { field: 'test11', name: '测试11' },
-            { field: 'test12', name: '测试12' },
-            { field: 'test13', name: '测试13' },
-            { field: 'test14', name: '测试14' },
-            { field: 'test15', name: '测试15' },
+            ...new Array(1000).fill(0).map((a, i) => {
+              return { field: 't' + i, name: '测试' + i }
+            }),
             {
               field: 'test17',
               name: '测试17',
