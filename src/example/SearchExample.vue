@@ -19,11 +19,16 @@ export default {
     //   { a: '各个苹果控昂科' },
     //   { a: '保工街怕噶而过【阿尔卡嘎' }
     // ]
-    const data = new Array(100000).fill({ a: '保工街怕噶而过【阿尔123123卡嘎' })
+    const data = new Array(10000).fill({ a: '保工街怕噶而过【阿尔123123卡嘎保工街怕噶而过【阿尔123123卡嘎' })
     console.log(Date.now())
     const crabSearch = new CrabSearch(data, ['a'])
     console.log(Date.now())
     window.crabSearch = crabSearch
+    setTimeout(() => {
+      console.log(Date.now())
+      crabSearch.query('bao工')
+      console.log(Date.now())
+    }, 6000)
   },
   methods: {
 

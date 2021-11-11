@@ -3,7 +3,7 @@
     拖拽例子，不使用draggable 可在拖拽时滚动。
     下一步：增加横向列表
     <ScrollBox style="width:100%;height:200px;border:1px solid #000;border-box;">
-      <DragBoxPlural
+      <DragTransfer
         v-model="options"
         box-index="a"
         style="width:100%;height:200px;text-align:center;"
@@ -13,10 +13,10 @@
             {{ item }}
           </div>
         </template>
-      </DragBoxPlural>
+      </DragTransfer>
     </ScrollBox>
     <ScrollBox style="width:100%;height:200px;border:1px solid #000;border-box;margin-top:10vh;">
-      <DragBoxPlural
+      <DragTransfer
         v-model="options"
         box-index="b"
         style="width:100%;height:200px;text-align:center;"
@@ -26,18 +26,18 @@
             {{ item }}
           </div>
         </template>
-      </DragBoxPlural>
+      </DragTransfer>
     </ScrollBox>
   </div>
 </template>
 
 <script>
-import DragBoxPlural from '../components/DragBoxPlural'
+import DragTransfer from '../components/DragTransfer'
 import ScrollBox from '../components/ScrollBox'
 export default {
   name: 'DragExample',
   label: '拖拽',
-  components: { DragBoxPlural, ScrollBox },
+  components: { DragTransfer, ScrollBox },
   data () {
     return {
       options: {
