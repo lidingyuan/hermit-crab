@@ -16,9 +16,9 @@ export default {
             class="table-head-row"
           >
             {
-              this.head.children.map(child => {
+              this.head.children.map((child, index) => {
                 return (<TableHeadCell
-                  key={child.field}
+                  key={child.field + index}
                   style={`width:${child.width}px`}
                   head={child}
                   sortTag={this.sortTag}
@@ -41,7 +41,7 @@ export default {
           this.$scopedSlots[this.head.field](this.head)
         )
       } else {
-        return this.head.name
+        return this.head.name || this.head.title
       }
     },
     renderSlotTitleSort () {

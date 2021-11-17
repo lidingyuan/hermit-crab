@@ -45,7 +45,9 @@ export default {
       transformX: 0,
 
       inputStyle: {},
-      inputDefaultVal: ''
+      inputDefaultVal: '',
+
+      virtualBoxDirty: false
     }
   },
   computed: {
@@ -54,10 +56,10 @@ export default {
     }
   },
   watch: {
-    virtualBeginRow () { this.renderByScroll() },
-    virtualBeginCol () { this.renderByScroll() },
-    virtualRowSize () { this.renderByScroll() },
-    virtualColSize () { this.renderByScroll() },
+    virtualBeginRow () { this.getRenderDataList() },
+    virtualBeginCol () { this.getRenderDataList() },
+    virtualRowSize () { this.getRenderDataList() },
+    virtualColSize () { this.getRenderDataList() },
     dataList () { this.getRenderDataList('force') },
     renderRowHeight () {
       if (this.focusBody !== this._uid) {
@@ -66,6 +68,9 @@ export default {
     },
     pasteData () {
       this.computeHeight('force')
+    },
+    virtualBoxStyle () {
+      this.virtualBoxDirty = true
     }
   },
   mounted () {
@@ -351,6 +356,12 @@ export default {
     }
   },
   render () {
+    const virtualBoxStyle = { ...this.virtualBoxStyle }
+    if (this.$el && !this.virtualBoxDirty) {
+      virtualBoxStyle['min-height'] = Math.max(parseInt(virtualBoxStyle['min-height']), this.$el.clientHeight) + 'px'
+      virtualBoxStyle['min-width'] = Math.max(parseInt(virtualBoxStyle['min-width']), this.$el.clientWidth) + 'px'
+    }
+    this.virtualBoxDirty = false
     function getExcelMask () {
       if (this.useExcelMode) {
         return (
@@ -416,7 +427,10 @@ export default {
         })
       } else {
         return this.pasteData[row.rowIndex] && this.pasteData[row.rowIndex][col.colIndex] !== undefined
-          ? this.pasteData[row.rowIndex][col.colIndex] : row.rawData[propKey]
+          ? this.pasteData[row.rowIndex][col.colIndex]
+          : col.formatter
+            ? col.formatter({ cellValue: row.rawData[propKey] })
+            : row.rawData[propKey]
       }
     }
     function renderRow (row) {
@@ -475,7 +489,7 @@ export default {
     return (
       <div
         class="table-body"
-        style={this.virtualBoxStyle}
+        style={virtualBoxStyle}
         {...{
           on: {
             paste: this.paste,

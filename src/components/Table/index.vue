@@ -9,11 +9,11 @@ export default {
   components: { TableHead, TableBody, ScrollBox },
   props: {
     // data
-    columnList: {
+    columns: {
       type: Array,
       default: () => []
     },
-    dataList: {
+    data: {
       type: Array,
       default: () => []
     },
@@ -131,7 +131,7 @@ export default {
   },
   computed: {
     stickyDataList () {
-      return this.dataList
+      return this.data
         .slice(0, this.stickyRows)
         .map((item, index) => {
           return {
@@ -141,10 +141,10 @@ export default {
         })
     },
     defaultDataList () {
-      const dataList = [...this.dataList]
+      const data = [...this.data]
       if (this.sortTag.key && this.orders[this.sortTag.type] !== null) {
         const type = this.orders[this.sortTag.type]
-        dataList.sort((a, b) => {
+        data.sort((a, b) => {
           if (a[this.sortTag.key] > b[this.sortTag.key]) {
             return this.sortMap[type](1)
           }
@@ -154,7 +154,7 @@ export default {
           return 0
         })
       }
-      const list = dataList
+      const list = data
         .slice(this.stickyRows)
         .map((item, index) => {
           return {
@@ -218,13 +218,51 @@ export default {
     },
     virtualBoxStyle () {
       return {
-        height: this.baseRowHeight * this.defaultDataList.length + 'px',
-        width: this.defaultWidth + 'px'
+        'min-height': this.baseRowHeight * this.defaultDataList.length + 'px',
+        'min-width': this.defaultWidth + 'px'
       }
+    },
+    scopedSlots () {
+      const keysMap = {
+        fixed: Object.keys(this.fixedDataProp),
+        default: Object.keys(this.dataProp)
+      }
+      const scopedSlots = {}
+      Object.keys(keysMap).forEach(key => {
+        keysMap[key].forEach(slotKey => {
+          if (!this.$scopedSlots[slotKey]) {
+            return
+          }
+          if (!scopedSlots[key]) {
+            scopedSlots[key] = {}
+          }
+          scopedSlots[key][slotKey] = props => this.$scopedSlots[slotKey](props)
+        })
+      })
+      return scopedSlots
+    },
+    headScopedSlots () {
+      const keysMap = {
+        fixed: Object.keys(this.fixedDataProp),
+        default: Object.keys(this.dataProp)
+      }
+      const scopedSlots = {}
+      Object.keys(keysMap).forEach(key => {
+        keysMap[key].forEach(slotKey => {
+          if (!this.$scopedSlots[slotKey + ':head']) {
+            return
+          }
+          if (!scopedSlots[key]) {
+            scopedSlots[key] = {}
+          }
+          scopedSlots[key][slotKey] = props => this.$scopedSlots[slotKey + ':head'](props)
+        })
+      })
+      return scopedSlots
     }
   },
   watch: {
-    columnList: {
+    columns: {
       handler (val) {
         if (val) {
           this.fixedHeadData = []
@@ -263,42 +301,70 @@ export default {
     window.removeEventListener('resize', this.getViewSize)
   },
   methods: {
-    buildHead (columnList, level = 1) {
+    buildHead (columns, level = 1, length = { fixedDataPropLength: 0, dataPropLength: 0 }) {
       const columnData = []
-      columnList.forEach(column => {
+      columns.forEach(column => {
+        let transformX = Infinity
+        let beginIndex = Infinity
+        let endIndex = 0
         let children = []
-        let width = column.width || 200
+        let width = parseInt(column.width) || 200
         let fixed = column.fixed || 'default'
-        let maxLevel = level
         let index = 0
         if (column.children && column.children.length) {
-          children = this.buildHead(column.children, level + 1)
+          children = this.buildHead(column.children, level + 1, length)
           width = 0
           fixed = ''
           children.forEach(item => {
             width += item.width
             fixed = fixed || item.fixed
-            maxLevel = Math.max(item.level, level)
+            transformX = Math.min(transformX, item.transformX)
+            beginIndex = Math.min(beginIndex, item.beginIndex)
+            endIndex = Math.max(endIndex, item.endIndex)
           })
         } else {
           if (fixed === 'left') {
-            index = Object.keys(this.fixedDataProp).length
-            this.fixedDataProp[column.field] = { field: column.field, width: width, transformX: this.fixedWidth, colIndex: index, align: column.align }
+            index = length.fixedDataPropLength
+            beginIndex = index
+            transformX = this.fixedWidth
+            this.fixedDataProp[column.field] = {
+              field: column.field,
+              formatter: column.formatter,
+              width: width,
+              transformX: this.fixedWidth,
+              colIndex: index,
+              align: column.align
+            }
+            length.fixedDataPropLength++
+            endIndex = length.fixedDataPropLength
             this.fixedWidth += width
           } else {
-            index = Object.keys(this.dataProp).length
-            this.dataProp[column.field] = { field: column.field, width: width, transformX: this.defaultWidth, colIndex: index, align: column.align }
+            index = length.dataPropLength
+            beginIndex = index
+            transformX = this.defaultWidth
+            this.dataProp[column.field] = {
+              field: column.field,
+              formatter: column.formatter,
+              width: width,
+              transformX: this.defaultWidth,
+              colIndex: index,
+              align: column.align
+            }
+            length.dataPropLength++
+            endIndex = length.dataPropLength
             this.defaultWidth += width
           }
         }
         const data = {
-          name: column.name,
+          name: column.name || column.title,
           field: column.field,
           index: index,
           fixed,
           width,
           level: level,
-          maxLevel: maxLevel,
+          beginIndex: beginIndex,
+          endIndex: endIndex,
+          transformX: transformX,
           rawData: column,
           align: column.headAlign,
           children

@@ -6,18 +6,32 @@ export default {
   components: { TableHeadCell },
   props: {
     headData: Array,
-    sortTag: Object
+    sortTag: Object,
+    virtualBeginCol: Number,
+    virtualColSize: Number,
+    virtualBoxStyle: Object
+  },
+  computed: {
+    virtualHeadData () {
+      return this.headData.filter(head => {
+        return (head.endIndex >= this.virtualBeginCol) && (head.beginIndex <= (this.virtualBeginCol + this.virtualColSize))
+      })
+    }
   },
   methods: {
     sortData (head) {
       this.$emit('sortData', head)
     },
-    renderCell () {
-      return this.headData.map(head => {
+    renderCell (headData) {
+      let style = {}
+      if (this.virtualBeginCol > -1) {
+        style = { transform: `translate(${headData[0].transformX}px, 0px)` }
+      }
+      return headData.map((head, index) => {
         return (
           <TableHeadCell
-            key={head.field}
-            style={{ width: head.width + 'px' }}
+            key={head.field + index}
+            style={{ width: head.width + 'px', ...style }}
             head={head}
             sortTag={this.sortTag}
             {...{
@@ -33,9 +47,17 @@ export default {
     }
   },
   render () {
+    let headData = this.headData
+    let style = {}
+    if (this.virtualBeginCol > -1) {
+      headData = this.virtualHeadData
+      style = {
+        ...this.virtualBoxStyle
+      }
+    }
     return (
-      <div class="table-head">
-        {this.renderCell()}
+      <div class="table-head" style={style}>
+        {this.renderCell(headData)}
       </div>
     )
   }

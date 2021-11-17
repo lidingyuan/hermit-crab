@@ -10,19 +10,22 @@ export function renderHead (h) {
               sortData: this.sortData
             }
           }}
-          scopedSlots={ getHeadScopedSlots.call(this, this.fixedHeadData)}
+          scopedSlots={ this.headScopedSlots.fixed}
         ></TableHead>
       </div>
       {renderScrollBox.call(this, h, false, true, 'default-head', '',
         <TableHead
           headData={this.defaultHeadData}
           sortTag={this.sortTag}
+          virtualBeginCol={this.virtualBeginCol}
+          virtualColSize={this.virtualColSize}
+          virtualBoxStyle={{ width: this.virtualBoxStyle.width }}
           {...{
             on: {
               sortData: this.sortData
             }
           }}
-          scopedSlots={ getHeadScopedSlots.call(this, this.defaultHeadData)}
+          scopedSlots={ this.headScopedSlots.default}
         ></TableHead>
       )}
     </div>
@@ -40,6 +43,7 @@ export function renderStickyBody (h) {
           dataProp: this.fixedDataProp,
           renderRowHeight: this.renderRowHeight.sticky,
           renderRowKey: 'sticky',
+          renderColKey: 'fixed',
           virtualBoxStyle: {}
         })}
       </div>
@@ -48,6 +52,7 @@ export function renderStickyBody (h) {
         dataProp: this.dataProp,
         renderRowHeight: this.renderRowHeight.sticky,
         renderRowKey: 'sticky',
+        renderColKey: 'default',
         virtualBoxStyle: { width: this.virtualBoxStyle.width }
       }))}
     </div>
@@ -65,7 +70,8 @@ export function renderDefaultBody (h) {
         virtualRowSize: this.virtualRowSize,
         virtualColSize: this.virtualColSize,
         renderRowHeight: this.renderRowHeight.default,
-        renderRowKey: 'default'
+        renderRowKey: 'default',
+        renderColKey: 'fixed'
       }))}
       {renderScrollBox.call(this, h, true, true, 'crab-table-default', '', renderBody.call(this, h, {
         dataList: this.defaultDataList,
@@ -78,7 +84,8 @@ export function renderDefaultBody (h) {
         virtualRowSize: this.virtualRowSize,
         virtualColSize: this.virtualColSize,
         renderRowHeight: this.renderRowHeight.default,
-        renderRowKey: 'default'
+        renderRowKey: 'default',
+        renderColKey: 'default'
       }))}
     </div>
   )
@@ -125,35 +132,8 @@ export function renderBody (h, prop) {
           'update:selectRow': (selectRow) => { this.selectRow = selectRow }
         }
       }}
-      scopedSlots={ getScopedSlots.call(this, Object.keys(prop.dataProp))}
+      scopedSlots={ this.scopedSlots[prop.renderColKey]}
     >
     </TableBody>
   )
-}
-function getScopedSlots (keys) {
-  const scopedSlots = {}
-  keys.forEach(key => {
-    if (!this.$scopedSlots[key]) {
-      return
-    }
-    scopedSlots[key] = props => this.$scopedSlots[key](props)
-  })
-  Object.keys(this.$scopedSlots).forEach(key => {
-    if (key.substr(0, 3) === 'row') {
-      scopedSlots[key] = props => this.$scopedSlots[key](props)
-    }
-  })
-  return scopedSlots
-}
-function getHeadScopedSlots (list, scopedSlots = {}) {
-  list.forEach(column => {
-    if (column.children?.length) {
-      getHeadScopedSlots.call(this, column.children, scopedSlots)
-    }
-    if (!this.$scopedSlots[column.field + ':head']) {
-      return
-    }
-    scopedSlots[column.field] = this.$scopedSlots[column.field + ':head']
-  })
-  return scopedSlots
 }
