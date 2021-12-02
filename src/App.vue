@@ -23,7 +23,7 @@ export default {
   components: { LayoutSiderbar, ...components },
   data () {
     return {
-      show: 'DragExample',
+      show: 'TableExample',
       menuList: Object.values(components).map(comp => {
         return {
           name: comp.label,

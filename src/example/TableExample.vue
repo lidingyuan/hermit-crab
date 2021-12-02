@@ -7,8 +7,8 @@
     <CrabTable
       style="width:100%;height:80vh;overflow: hidden;"
       :virtual-col="9"
-      :column-list="columnList"
-      :data-list="dataList"
+      :columns="columnList"
+      :data="dataList"
     >
       <!-- future example -->
       <TableBody :data-list="dataList.slice(0,2)">
@@ -30,8 +30,8 @@
     <CrabTable
       style="width:100%;height:80vh;overflow: hidden;"
       :virtual-col="9"
-      :column-list="columnList"
-      :data-list="dataList"
+      :columns="columnList"
+      :data="dataList"
       :sticky-rows="3"
     >
       <template #row:0="{row}">
@@ -69,37 +69,42 @@ export default {
       columnList: [
         {
           field: 'test1',
-          name: '测试1',
+          title: '测试1',
           children: [
-            { field: 'test1', name: '测试2' },
-            { field: 'test2', name: '测试3', align: 'right', headAlign: 'right' }
+            { field: 'test1', title: '测试2' },
+            { field: 'test2', title: '测试3', align: 'right', headAlign: 'right' }
           ]
         },
         {
           field: 'test4',
-          name: '测试4',
+          title: '测试4',
           children: [
             {
               field: 'test3',
-              name: '测试5',
+              title: '测试5',
               children: [
-                { field: 'test5', name: '测试6', fixed: 'left' }
+                { field: 'test5', title: '测试6', fixed: 'left' }
               ]
             }
           ]
         },
         {
           field: 'test7',
-          name: '测试7',
+          title: '测试7',
           children: [
-            ...new Array(1000).fill(0).map((a, i) => {
-              return { field: 't' + i, name: '测试' + i }
-            }),
+            { field: 'test8', title: '测试8' },
+            { field: 'test9', title: '测试9' },
+            { field: 'test10', title: '测试10' },
+            { field: 'test11', title: '测试11' },
+            { field: 'test12', title: '测试12' },
+            { field: 'test13', title: '测试13' },
+            { field: 'test14', title: '测试14' },
+            { field: 'test15', title: '测试15' },
             {
               field: 'test17',
-              name: '测试17',
+              title: '测试17',
               children: [
-                { field: 'test16', name: '测试16' }
+                { field: 'test16', title: '测试16' }
               ]
             }
           ]

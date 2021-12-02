@@ -159,6 +159,7 @@ export default {
         .map((item, index) => {
           return {
             rowIndex: index,
+            rawRowIndex: index + this.stickyRows,
             rawData: item,
             transformY: index * this.baseRowHeight
           }
@@ -223,40 +224,22 @@ export default {
       }
     },
     scopedSlots () {
-      const keysMap = {
-        fixed: Object.keys(this.fixedDataProp),
-        default: Object.keys(this.dataProp)
-      }
       const scopedSlots = {}
-      Object.keys(keysMap).forEach(key => {
-        keysMap[key].forEach(slotKey => {
-          if (!this.$scopedSlots[slotKey]) {
-            return
-          }
-          if (!scopedSlots[key]) {
-            scopedSlots[key] = {}
-          }
-          scopedSlots[key][slotKey] = props => this.$scopedSlots[slotKey](props)
-        })
+      Object.keys(this.$scopedSlots).forEach(key => {
+        const arr = key.split(':head')
+        if (arr.length !== 2 || arr[1] !== '') {
+          scopedSlots[arr[0]] = props => this.$scopedSlots[key](props)
+        }
       })
       return scopedSlots
     },
     headScopedSlots () {
-      const keysMap = {
-        fixed: Object.keys(this.fixedDataProp),
-        default: Object.keys(this.dataProp)
-      }
       const scopedSlots = {}
-      Object.keys(keysMap).forEach(key => {
-        keysMap[key].forEach(slotKey => {
-          if (!this.$scopedSlots[slotKey + ':head']) {
-            return
-          }
-          if (!scopedSlots[key]) {
-            scopedSlots[key] = {}
-          }
-          scopedSlots[key][slotKey] = props => this.$scopedSlots[slotKey + ':head'](props)
-        })
+      Object.keys(this.$scopedSlots).forEach(key => {
+        const arr = key.split(':head')
+        if (arr.length === 2 && arr[1] === '') {
+          scopedSlots[arr[0]] = props => this.$scopedSlots[key](props)
+        }
       })
       return scopedSlots
     }

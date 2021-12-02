@@ -125,9 +125,9 @@ export default {
       }, 0)
     },
     mousemove (event) {
-      const rowIndex = parseInt(this.findRow(event.target).getAttribute('rowIndex'))
-      if (this.hoverRow !== rowIndex) {
-        this.$emit('update:hoverRow', rowIndex)
+      const rawRowIndex = parseInt(this.findRow(event.target).getAttribute('rawRowIndex'))
+      if (this.hoverRow !== rawRowIndex) {
+        this.$emit('update:hoverRow', rawRowIndex)
       }
       if (this.picking) {
         const cell = this.findCell(event.target)
@@ -145,9 +145,9 @@ export default {
         this.picking = false
         this.$refs.copy && this.$refs.copy.select()
       } else {
-        const rowIndex = parseInt(this.findRow(event.target).getAttribute('rowIndex'))
-        if (this.selectRow !== rowIndex) {
-          this.$emit('update:selectRow', rowIndex)
+        const rawRowIndex = parseInt(this.findRow(event.target).getAttribute('rawRowIndex'))
+        if (this.selectRow !== rawRowIndex) {
+          this.$emit('update:selectRow', rawRowIndex)
         }
       }
     },
@@ -435,10 +435,11 @@ export default {
     }
     function renderRow (row) {
       const classList = ['table-body-row']
-      if (this.hoverRow === row.rowIndex) {
+      console.log(row)
+      if (this.hoverRow === row.rawRowIndex) {
         classList.push('row-hover')
       }
-      if (this.selectRow === row.rowIndex) {
+      if (this.selectRow === row.rawRowIndex) {
         classList.push('row-select')
       }
       if (this.$scopedSlots['row:' + row.rowIndex]) {
@@ -447,6 +448,7 @@ export default {
             ref={`row-${row.rowIndex}`}
             key={row.rowIndex}
             rowIndex={row.rowIndex}
+            rawRowIndex={row.rawRowIndex}
             class={classList}
             style={getRowStyle.call(this, row)}
           >
@@ -464,6 +466,7 @@ export default {
             ref={`row-${row.rowIndex}`}
             key={row.rowIndex}
             rowIndex={row.rowIndex}
+            rawRowIndex={row.rawRowIndex}
             class={classList}
             style={getRowStyle.call(this, row)}
           >
@@ -475,6 +478,7 @@ export default {
                     key={propKey}
                     style={getCellStyle.call(this, col)}
                     row-index={row.rowIndex}
+                    raw-row-index={row.rawRowIndex}
                     col-index={col.colIndex}
                   >
                     {getScopedSlots.call(this, propKey, row, col)}

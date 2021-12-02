@@ -10,7 +10,7 @@ export function renderHead (h) {
               sortData: this.sortData
             }
           }}
-          scopedSlots={ this.headScopedSlots.fixed}
+          scopedSlots={ this.headScopedSlots}
         ></TableHead>
       </div>
       {renderScrollBox.call(this, h, false, true, 'default-head', '',
@@ -19,13 +19,13 @@ export function renderHead (h) {
           sortTag={this.sortTag}
           virtualBeginCol={this.virtualBeginCol}
           virtualColSize={this.virtualColSize}
-          virtualBoxStyle={{ width: this.virtualBoxStyle.width }}
+          virtualBoxStyle= {{ 'min-width': this.virtualBoxStyle['min-width'] }}
           {...{
             on: {
               sortData: this.sortData
             }
           }}
-          scopedSlots={ this.headScopedSlots.default}
+          scopedSlots={ this.headScopedSlots}
         ></TableHead>
       )}
     </div>
@@ -53,7 +53,7 @@ export function renderStickyBody (h) {
         renderRowHeight: this.renderRowHeight.sticky,
         renderRowKey: 'sticky',
         renderColKey: 'default',
-        virtualBoxStyle: { width: this.virtualBoxStyle.width }
+        virtualBoxStyle: { 'min-width': this.virtualBoxStyle['min-width'] }
       }))}
     </div>
   )
@@ -65,7 +65,7 @@ export function renderDefaultBody (h) {
         dataList: this.defaultDataList,
         dataProp: this.fixedDataProp,
         virtualBeginRow: this.virtualBeginRow,
-        virtualBoxStyle: { height: this.virtualBoxStyle.height },
+        virtualBoxStyle: { 'min-height': this.virtualBoxStyle['min-height'] },
         transformY: this.virtualBeginRow !== -1 ? this.scrollTop : 0,
         virtualRowSize: this.virtualRowSize,
         virtualColSize: this.virtualColSize,
@@ -132,7 +132,7 @@ export function renderBody (h, prop) {
           'update:selectRow': (selectRow) => { this.selectRow = selectRow }
         }
       }}
-      scopedSlots={ this.scopedSlots[prop.renderColKey]}
+      scopedSlots={ this.scopedSlots}
     >
     </TableBody>
   )
