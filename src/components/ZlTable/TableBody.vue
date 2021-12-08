@@ -38,9 +38,6 @@ export default {
   computed: {
     useExcelMode () {
       return this.excelMode && !Object.keys(this.$scopedSlots).length
-    },
-    pasteData () {
-      return this.mixRender?.data?.pasteData || {}
     }
   },
   watch: {
@@ -51,9 +48,6 @@ export default {
     dataList () { this.getRenderDataList('force') },
     renderRowHeight () {
       this.computeHeight()
-    },
-    pasteData () {
-      this.computeHeight('force')
     },
     virtualBoxStyle () {
       this.virtualBoxDirty = true
@@ -159,12 +153,19 @@ export default {
           row: row.rawData,
           propKey: propKey
         })
+      } else if (this.mixRender && this.mixRender.scopedSlots) {
+        return this.mixRender.scopedSlots({
+          rowIndex: row.rowIndex,
+          rawRowIndex: row.rawRowIndex,
+          colIndex: col.colIndex,
+          rawColIndex: col.rawColIndex,
+          row: row.rawData,
+          propKey: propKey
+        }, this)
       } else {
-        return this.pasteData[row.rawRowIndex] && this.pasteData[row.rawRowIndex][col.rawColIndex] !== undefined
-          ? this.pasteData[row.rawRowIndex][col.rawColIndex]
-          : col.formatter
-            ? col.formatter({ cellValue: row.rawData[propKey] })
-            : row.rawData[propKey]
+        return col.formatter
+          ? col.formatter({ cellValue: row.rawData[propKey] })
+          : row.rawData[propKey]
       }
     }
     function renderRow (row) {

@@ -4,7 +4,7 @@ import TableInputCell from './TableInputCell'
 export default {
   name: 'Excel',
   components: { TablePickCell, TableInputCell },
-  props: ['columns', 'data'],
+  inheritAttrs: false,
   data () {
     return {
       // pick
@@ -45,8 +45,22 @@ export default {
           render: {
             getExcelMask: this.getExcelMask,
             getExcelInput: this.getExcelInput
+          },
+          scopedSlots: ({ rawRowIndex, rawColIndex, row, propKey }, that) => {
+            if (that !== this.active) {
+              return row[propKey]
+            } else {
+              return this.pasteData?.[rawRowIndex]?.[rawColIndex] || row[propKey]
+            }
           }
         }
+      }
+    }
+  },
+  watch: {
+    pasteData () {
+      if (this.active) {
+        this.active.computeHeight('force')
       }
     }
   },
@@ -306,8 +320,7 @@ export default {
     return (
       <ZlTable
         mixRender={this.mixRender}
-        columns={this.columns}
-        data={this.data}
+        props={this.$attrs}
       />
     )
   }
