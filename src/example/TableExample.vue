@@ -4,30 +4,24 @@
     表格例子，支持多级表头，固定行固定列，虚拟滚动，复制粘贴(excel)，排序等
     预计添加：
     1.动态配置表格结构
-    <CrabTable
+    <ZlExcel
       style="width:100%;height:80vh;overflow: hidden;"
       :virtual-col="9"
       :columns="columnList"
       :data="dataList"
     >
       <!-- future example -->
-      <TableBody :data-list="dataList.slice(0,2)">
+      <!-- <TableBody :data-list="dataList.slice(0,2)">
         <TableChunk scroll-bind="1" />
         <TableChunk scroll-bind="2" />
       </TableBody>
       <TableBody :data-list="dataList.slice(2,4)">
         <TableChunk scroll-bind="1" />
         <TableChunk scroll-bind="2" />
-      </TableBody>
+      </TableBody> -->
       <!-- future example end-->
-      <template #test4:head>
-        333
-      </template>
-      <template #test5:head>
-        321
-      </template>
-    </CrabTable>
-    <CrabTable
+    </ZlExcel>
+    <ZlTable
       style="width:100%;height:80vh;overflow: hidden;"
       :virtual-col="9"
       :columns="columnList"
@@ -52,18 +46,18 @@
       <template #test12="{row}">
         <Button>{{ row.test12 || '按钮' }}</Button>
       </template>
-    </CrabTable>
+    </ZlTable>
   </div>
 </template>
 
 <script>
-import CrabTable from '../components/Table'
+import ZlTable from '../components/ZlTable'
 import Button from '../components/Button'
 import WaterMark from '@/components/WaterMark'
 export default {
   name: 'TableExample',
   label: '表格',
-  components: { CrabTable, Button, WaterMark },
+  components: { ZlTable, Button, WaterMark },
   data () {
     return {
       columnList: [
