@@ -1,5 +1,5 @@
 <template>
-  <div class="date-container">
+  <div class="zl-date-pick">
     <date-head
       :content-date="contentDate"
       :content-type="contentType"
@@ -46,7 +46,7 @@ import MonthContent from './content/MonthContent.vue'
 import YearContent from './content/YearContent.vue'
 import * as formatUtil from './utils/dateFormatUtil'
 export default {
-  name: 'DateContainer',
+  name: 'ZlDatePick',
   components: { DateHead, DateContent, WeekContent, MonthContent, YearContent },
   props: {
     value: {
@@ -121,7 +121,7 @@ export default {
 </script>
 
 <style lang='scss' scoped>
-.date-container{
+.zl-date-pick{
   overflow: hidden;
   border: 1px solid #e4e7ed;
   box-shadow: 0 2px 12px 0 rgb(0 0 0 / 10%);
