@@ -47,11 +47,7 @@ export default {
             getExcelInput: this.getExcelInput
           },
           scopedSlots: ({ rawRowIndex, rawColIndex, row, propKey }, that) => {
-            if (that !== this.active) {
-              return row[propKey]
-            } else {
-              return this.pasteData?.[rawRowIndex]?.[rawColIndex] || row[propKey]
-            }
+            return this.pasteData?.[rawRowIndex]?.[rawColIndex] || row[propKey]
           }
         }
       }

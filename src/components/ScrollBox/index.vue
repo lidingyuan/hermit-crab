@@ -2,6 +2,7 @@
   <div
     ref="scroll-box"
     class="scroll-box"
+    style="overflow: hidden;"
   >
     <div
       ref="scroll-view"
@@ -174,7 +175,6 @@ export default {
   position: relative;
   height: 100%;
   width: 100%;
-  overflow: hidden;
 }
 .bar-y{
   position: absolute;
