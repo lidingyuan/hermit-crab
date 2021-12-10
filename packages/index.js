@@ -1,14 +1,14 @@
 import RecordParam from '@/utils/RecordParam'
 import ScrollBox from '@/components/ScrollBox'
 import DragBoxPlural from '@/components/DragBoxPlural'
-import CrabTable from '@/components/Table'
+import ZlTable from '@/components/ZlTable'
 
 import directive from '@/directive'
 
 const components = [
   ScrollBox,
   DragBoxPlural,
-  CrabTable
+  ZlTable
 ]
 
 const utils = {
